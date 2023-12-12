@@ -1,25 +1,25 @@
-import { getMockReq, getMockRes } from '@jest-mock/express';
-import { setTestEnvironmentVars } from '../helpers';
-import { constructBottle } from '../../../bottle';
-import ProjectService from '../../../services/project.service';
+import { getMockReq, getMockRes } from "@jest-mock/express";
+import { setTestEnvironmentVars } from "../helpers";
+import { constructBottle } from "../../../bottle";
+import ProjectService from "../../../services/project.service";
 
 jest.mock("pg");
-jest.mock('nodemailer');
+jest.mock("nodemailer");
 
-describe('tests deleteUserFromAllProjects method', () => {
+describe("tests deleteUserFromAllProjects method", () => {
   beforeEach(() => {
     setTestEnvironmentVars();
     jest.restoreAllMocks();
   });
 
-  it('should successfully delete user from all projects', async () => {
+  it("should successfully delete user from all projects", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        name: 'test',
+        name: "test",
       },
-      role: 'superadmin',
+      role: "superadmin",
       params: {
         userId: "1",
       },

@@ -1,26 +1,26 @@
-import TokenHandler from '../../../support/tokenhandler.support';
-import { getMockReq, getMockRes } from '@jest-mock/express';
-import { constructBottle } from '../../../bottle';
-import UserService from '../../../services/user.service';
-import { setTestEnvironmentVars } from '../helpers';
+import TokenHandler from "../../../support/tokenhandler.support";
+import { getMockReq, getMockRes } from "@jest-mock/express";
+import { constructBottle } from "../../../bottle";
+import UserService from "../../../services/user.service";
+import { setTestEnvironmentVars } from "../helpers";
 
 jest.mock("pg");
-jest.mock('nodemailer');
+jest.mock("nodemailer");
 
-describe('tests verifyRecovery method', () => {
+describe("tests verifyRecovery method", () => {
   beforeEach(() => {
     jest.restoreAllMocks();
     setTestEnvironmentVars();
   });
 
-  it('should throw a 400 error for non valid token', async () => {
+  it("should throw a 400 error for non valid token", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
       },
       params: {
-        token: 'test',
+        token: "test",
       },
     });
 
@@ -36,8 +36,8 @@ describe('tests verifyRecovery method', () => {
 
     expect(UserService.prototype.findUsers).toHaveBeenCalledTimes(1);
     expect(UserService.prototype.findUsers).toHaveBeenCalledWith(
-      ['reset_password_token'],
-      ['test']
+      ["reset_password_token"],
+      ["test"]
     );
 
     expect(res.status).toHaveBeenCalledWith(400);
@@ -45,23 +45,23 @@ describe('tests verifyRecovery method', () => {
 
     expect(res.send).toHaveBeenCalledTimes(1);
     expect(res.send).toHaveBeenCalledWith({ 
-      message: 'Something went wrong on our end. Please try again.' 
+      message: "Something went wrong on our end. Please try again." 
     });
   });
 
-  it('should throw a 400 error for expired token', async () => {
+  it("should throw a 400 error for expired token", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
       },
       params: {
-        token: 'test',
+        token: "test",
       },
     });
     
     
-    jest.spyOn(TokenHandler.prototype, 'isPasswordTokenExpired');
+    jest.spyOn(TokenHandler.prototype, "isPasswordTokenExpired");
     jest.spyOn(UserService.prototype, "findUsers").mockResolvedValueOnce({ 
       rows: [{ reset_password_token_created_at: 0 }], 
       command: "", 
@@ -79,8 +79,8 @@ describe('tests verifyRecovery method', () => {
 
     expect(UserService.prototype.findUsers).toHaveBeenCalledTimes(1);
     expect(UserService.prototype.findUsers).toHaveBeenCalledWith(
-      ['reset_password_token'],
-      ['test']
+      ["reset_password_token"],
+      ["test"]
     );
 
     expect(res.status).toHaveBeenCalledWith(400);
@@ -88,22 +88,22 @@ describe('tests verifyRecovery method', () => {
 
     expect(res.send).toHaveBeenCalledTimes(1);
     expect(res.send).toHaveBeenCalledWith({ 
-      message: 'Something went wrong on our end. Please try again.' 
+      message: "Something went wrong on our end. Please try again." 
     });
   });
 
-  it('should redirect to /recover/test', async () => {
+  it("should redirect to /recover/test", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
       },
       params: {
-        token: 'test',
+        token: "test",
       },
     });
 
-    jest.spyOn(TokenHandler.prototype, 'isPasswordTokenExpired');
+    jest.spyOn(TokenHandler.prototype, "isPasswordTokenExpired");
     jest.spyOn(UserService.prototype, "findUsers").mockResolvedValueOnce({ 
       rows: [{ reset_password_token_created_at: 3093496462800000 }], 
       command: "", 
@@ -117,15 +117,15 @@ describe('tests verifyRecovery method', () => {
     expect(TokenHandler.prototype.isPasswordTokenExpired).toHaveBeenCalledTimes(1);
     expect(TokenHandler.prototype.isPasswordTokenExpired).toHaveBeenCalledWith({ 
       reset_password_token_created_at: 3093496462800000 
-    })
+    });
 
     expect(UserService.prototype.findUsers).toHaveBeenCalledTimes(1);
     expect(UserService.prototype.findUsers).toHaveBeenCalledWith(
-      ['reset_password_token'],
-      ['test']
+      ["reset_password_token"],
+      ["test"]
     );
 
     expect(res.redirect).toHaveBeenCalledTimes(1);
-    expect(res.redirect).toHaveBeenCalledWith('/recover/test');
+    expect(res.redirect).toHaveBeenCalledWith("/recover/test");
   });
 });

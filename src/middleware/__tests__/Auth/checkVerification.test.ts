@@ -1,23 +1,23 @@
-import jwt from 'jsonwebtoken';
-import { getMockReq, getMockRes } from '@jest-mock/express';
-import { checkVerification } from '../../auth.middleware';
-import { constructBottle } from '../../../bottle';
-import { setTestEnvironmentVars } from '../../../controllers/__tests__/helpers';
+import jwt from "jsonwebtoken";
+import { getMockReq, getMockRes } from "@jest-mock/express";
+import { checkVerification } from "../../auth.middleware";
+import { constructBottle } from "../../../bottle";
+import { setTestEnvironmentVars } from "../../../controllers/__tests__/helpers";
 
-describe('tests checkVerification method', () => {
+describe("tests checkVerification method", () => {
   beforeEach(() => {
     jest.restoreAllMocks();
     setTestEnvironmentVars();
   });
 
-  it('should call next due to verified token', async () => {
+  it("should call next due to verified token", async () => {
     const bottle = constructBottle();
     const { res, next } = getMockRes();
     const authToken = jwt.sign({
       id: 1, 
-      role: 'superadmin', 
+      role: "superadmin", 
       verified: true, 
-      username: 'test', 
+      username: "test", 
       rememberMe: false,
     }, bottle.container.CleanEnv.AUTH_SECRET, {
       expiresIn: 604800, //  1 week
@@ -33,14 +33,14 @@ describe('tests checkVerification method', () => {
     expect(next).toHaveBeenCalledTimes(1);
   });
 
-  it('should fail with 403 due to invalid or unverified token', async () => {
+  it("should fail with 403 due to invalid or unverified token", async () => {
     const bottle = constructBottle();
     const { res, next } = getMockRes();
     const authToken = jwt.sign({
       id: 1, 
-      role: 'superadmin', 
+      role: "superadmin", 
       verified: false, 
-      username: 'test', 
+      username: "test", 
       rememberMe: false,
     }, bottle.container.CleanEnv.AUTH_SECRET, {
       expiresIn: 604800, //  1 week
@@ -57,7 +57,7 @@ describe('tests checkVerification method', () => {
     
     expect(res.send).toHaveBeenCalledTimes(1);
     expect(res.send).toHaveBeenCalledWith({
-      message: 'Access Forbidden',
+      message: "Access Forbidden",
     });
 
     expect(res.status).toHaveBeenCalledTimes(1);

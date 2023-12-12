@@ -1,5 +1,5 @@
 import { parseStringPromise as parseXML } from "xml2js";
-import errorMessages from '../messages/errors.messages';
+import errorMessages from "../messages/errors.messages";
 import DBClientPool from "../db-client-pool";
 import UserService from "../services/user.service";
 import FileParser from "../support/fileparser.support";
@@ -41,7 +41,7 @@ class ProjectController {
       !req.body.name
     ) {
       return res.status(400).json({ 
-        message: 'Insufficient files submitted: Request requires a project name, metric file, and bi-text file' 
+        message: "Insufficient files submitted: Request requires a project name, metric file, and bi-text file" 
       });
     }
 
@@ -68,7 +68,7 @@ class ProjectController {
     try {
       let projectResponse;
 
-      if (req.role === 'superadmin') {
+      if (req.role === "superadmin") {
         projectResponse = await this.projectService.getAllProjects();
       } else {
         projectResponse = await this.projectService.getProjectsByUserId(String(req.userId));
@@ -140,8 +140,8 @@ class ProjectController {
       for (let i = 0; i < projectSegmentsResponse.rows.length; ++i) {
         const { id } = projectSegmentsResponse.rows[i];
         const segmentIssues = await this.issueService.getSegmentIssuesBySegmentId(id);
-        const sourceIssues = segmentIssues.rows.filter((issue) => issue.type === 'source');
-        const targetIssues = segmentIssues.rows.filter((issue) => issue.type === 'target');
+        const sourceIssues = segmentIssues.rows.filter((issue) => issue.type === "source");
+        const targetIssues = segmentIssues.rows.filter((issue) => issue.type === "target");
         projectSegmentsResponse.rows[i].sourceErrors = sourceIssues;
         projectSegmentsResponse.rows[i].targetErrors = targetIssues;
       }
@@ -184,8 +184,8 @@ class ProjectController {
       // Maps metric to JSON format required by Python app
       const metricJSONTranslator = (rawMetric: any) => {
         const translator = {
-          to: 'issueId',
-          from: 'issue',
+          to: "issueId",
+          from: "issue",
         };
 
         const translateIssue = (issue: any) => {
@@ -314,7 +314,7 @@ class ProjectController {
 
     if (username === undefined) {
       return res.status(400).json({ 
-        message: 'Body must include a username' 
+        message: "Body must include a username" 
       });
     }
 
@@ -325,7 +325,7 @@ class ProjectController {
         });
       }
 
-      const userResponse = await this.userService.findUsers(['username'], [username]);
+      const userResponse = await this.userService.findUsers(["username"], [username]);
 
       if (userResponse.rows.length === 0) {
         return res.status(404).json({ 
@@ -351,7 +351,7 @@ class ProjectController {
       await this.projectService.mapUsertoProject(projectId, String(user.user_id));
       return res.status(204).send();
     } catch (err: any) {
-      if (err.code === '23505') {
+      if (err.code === "23505") {
         return res.status(409).json({ 
           message: `${username} has already been assigned to this project` 
         });
@@ -398,7 +398,7 @@ class ProjectController {
 
       return res.status(500).send({ 
         message: errorMessages.generic
-      })
+      });
     }
   }
 
@@ -409,13 +409,13 @@ class ProjectController {
     let parsedMetricFile;
     let specificationsFile;
     let parsedSpecificationsFile;
-    let specifications = '';
+    let specifications = "";
     let metric = new Array<any>();
     let segments = new Array<any>();
     let sourceWordCount = 0;
     let targetWordCount = 0;
     let projectId;
-    const isAdmin = ['superadmin', 'admin'].includes(req.role);
+    const isAdmin = ["superadmin", "admin"].includes(req.role);
     const { name, finished, segmentNum } = req.body;
     const newProjectAttributes = new Array<any>();
     const newProjectValues = new Array<any>();
@@ -433,7 +433,7 @@ class ProjectController {
     try {
       if (!await this.isTypologyImported()) {
         return res.status(400).json({ 
-          message: 'Typology not yet imported. Please contact an administrator for help.' 
+          message: "Typology not yet imported. Please contact an administrator for help." 
         });
       }
 
@@ -441,7 +441,7 @@ class ProjectController {
 
       if ((metricFile !== undefined || bitextFile !== undefined) && hasSegmentIssues) {
         return res.status(400).json({ 
-          message: 'Changing the bi-text or metric files is not possible until all reported issues are removed.' 
+          message: "Changing the bi-text or metric files is not possible until all reported issues are removed." 
         });
       }
     } catch (err) {
@@ -458,30 +458,30 @@ class ProjectController {
     }
 
     if (name !== undefined && isAdmin) {
-      newProjectAttributes.push('name');
+      newProjectAttributes.push("name");
       newProjectValues.push(name);
     }
 
     if (finished !== undefined) {
-      newProjectAttributes.push('finished');
+      newProjectAttributes.push("finished");
       newProjectValues.push(finished);
     }
 
     if (segmentNum !== undefined) {
-      newProjectAttributes.push('last_segment');
+      newProjectAttributes.push("last_segment");
       newProjectValues.push(segmentNum);
     }
     
     if (metricFile !== undefined && isAdmin && !Array.isArray(metricFile)) {
-      newProjectAttributes.push('metric_file');
+      newProjectAttributes.push("metric_file");
       newProjectValues.push(metricFile.name);
 
       try {
         parsedMetricFile = await parseXML(
           metricFile.data.toString()
-        )
+        );
       } catch(err) {
-        let errMessage = isError(err) ? err.message : "";
+        const errMessage = isError(err) ? err.message : "";
 
         return res.status(400).json({ 
           message: `Problem parsing metric file: ${errMessage}` 
@@ -490,7 +490,7 @@ class ProjectController {
 
       if (!parsedMetricFile || !parsedMetricFile.issues || !parsedMetricFile.issues.issue) {
         return res.status(400).json({
-          message: 'No issues found in metric file.' 
+          message: "No issues found in metric file." 
         });
       }
 
@@ -522,21 +522,21 @@ class ProjectController {
       segments = bitextFileResponse.segments;
       sourceWordCount = bitextFileResponse.sourceWordCount;
       targetWordCount = bitextFileResponse.targetWordCount;
-      newProjectAttributes.push('bitext_file');
+      newProjectAttributes.push("bitext_file");
       newProjectValues.push(bitextFile.name);
-      newProjectAttributes.push('last_segment');
+      newProjectAttributes.push("last_segment");
       newProjectValues.push(1);
-      newProjectAttributes.push('source_word_count');
+      newProjectAttributes.push("source_word_count");
       newProjectValues.push(sourceWordCount);
-      newProjectAttributes.push('target_word_count');
+      newProjectAttributes.push("target_word_count");
       newProjectValues.push(targetWordCount);
     }
 
     if (specificationsFile !== undefined && isAdmin && !Array.isArray(specificationsFile)) {
       try {
-        parsedSpecificationsFile = await parseXML(specificationsFile.data.toString())
+        parsedSpecificationsFile = await parseXML(specificationsFile.data.toString());
       } catch(err) {
-        let errMessage = isError(err) ? err.message : "";
+        const errMessage = isError(err) ? err.message : "";
 
         return res.status(400).json({ 
           message:  `Problem parsing specifications file: ${errMessage}`
@@ -555,9 +555,9 @@ class ProjectController {
       }
 
       specifications = specificationsFileResponse;
-      newProjectAttributes.push('specifications_file');
+      newProjectAttributes.push("specifications_file");
       newProjectValues.push(specificationsFile.name);
-      newProjectAttributes.push('specifications');
+      newProjectAttributes.push("specifications");
       newProjectValues.push(specifications);
     }
 
@@ -587,7 +587,7 @@ class ProjectController {
       ) {
         const newProject = await this.projectService.createProject(
           name, 
-          specificationsFile ? specificationsFile.name : '', 
+          specificationsFile ? specificationsFile.name : "", 
           specifications, 
           metricFile.name, 
           bitextFile.name, 
@@ -636,7 +636,7 @@ class ProjectController {
       if (bitextFile !== undefined && isAdmin) {
         if (isUpdate) {
           await this.segmentService.deleteSegments(
-            ['project_id'], 
+            ["project_id"], 
             [projectId], 
             dbTXNClient
           );
@@ -659,7 +659,7 @@ class ProjectController {
       }
 
       await this.dbClientPool.commitTransaction(dbTXNClient);
-      const message = isUpdate ? 'Project updated successfully.' : 'Project created successfully.';
+      const message = isUpdate ? "Project updated successfully." : "Project created successfully.";
       return res.json({ message });
     } catch (err) {
       if (isError(err)) {
@@ -677,12 +677,12 @@ class ProjectController {
   }
 
   async isUserAssignedToProject(req: Request, projectId: string) {
-    if (req.role === 'superadmin') {
+    if (req.role === "superadmin") {
       return true;
     }
 
     const userProjectsResponse = await this.projectService.getProjectsByUserId(String(req.userId));
-    return userProjectsResponse.rows.filter((proj) => Number(proj.project_id) === Number(projectId)).length > 0
+    return userProjectsResponse.rows.filter((proj) => Number(proj.project_id) === Number(projectId)).length > 0;
   }
 
   async isTypologyImported() {
@@ -710,15 +710,15 @@ class ProjectController {
     const report: {[key: string]: any} = {};
 
     reportResponse.rows.forEach((issue) => {
-      const sourceNetural = issue.level.filter((level: any, index: any) => level === 'neutral' && issue.type[index] === 'source').length;
-      const sourceMinor = issue.level.filter((level: any, index: any) => level === 'minor' && issue.type[index] === 'source').length;
-      const sourceMajor = issue.level.filter((level: any, index: any) => level === 'major' && issue.type[index] === 'source').length;
-      const sourceCritical = issue.level.filter((level: any, index: any) => level === 'critical' && issue.type[index] === 'source').length;
+      const sourceNetural = issue.level.filter((level: any, index: any) => level === "neutral" && issue.type[index] === "source").length;
+      const sourceMinor = issue.level.filter((level: any, index: any) => level === "minor" && issue.type[index] === "source").length;
+      const sourceMajor = issue.level.filter((level: any, index: any) => level === "major" && issue.type[index] === "source").length;
+      const sourceCritical = issue.level.filter((level: any, index: any) => level === "critical" && issue.type[index] === "source").length;
 
-      const targetNetural = issue.level.filter((level: any, index: any) => level === 'neutral' && issue.type[index] === 'target').length;
-      const targetMinor = issue.level.filter((level: any, index: any) => level === 'minor' && issue.type[index] === 'target').length;
-      const targetMajor = issue.level.filter((level: any, index: any) => level === 'major' && issue.type[index] === 'target').length;
-      const targetCritical = issue.level.filter((level: any, index: any) => level === 'critical' && issue.type[index] === 'target').length;
+      const targetNetural = issue.level.filter((level: any, index: any) => level === "neutral" && issue.type[index] === "target").length;
+      const targetMinor = issue.level.filter((level: any, index: any) => level === "minor" && issue.type[index] === "target").length;
+      const targetMajor = issue.level.filter((level: any, index: any) => level === "major" && issue.type[index] === "target").length;
+      const targetCritical = issue.level.filter((level: any, index: any) => level === "critical" && issue.type[index] === "target").length;
 
       report[issue.issue] = [
         // Source issues

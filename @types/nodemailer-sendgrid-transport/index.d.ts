@@ -9,5 +9,5 @@ declare module "nodemailer-sendgrid-transport" {
     }
   ): SMTPTransport 
 
-  export default transporter
+  export default transporter;
 }

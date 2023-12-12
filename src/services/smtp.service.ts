@@ -10,4 +10,4 @@ class SMTPService {
   } 
 }
 
-export default SMTPService
+export default SMTPService;

@@ -28,11 +28,11 @@ class UserService {
     userId: string, 
     dbClient: DBClient = this.dbClientPool.connectionPool
   ) {
-    let filters = '';
+    let filters = "";
     const numParams = attributes.length;
 
     for (let i = 0; i < numParams; ++i) {
-      if (i > 0) filters += ', ';
+      if (i > 0) filters += ", ";
 
       filters += `${attributes[i]} = $${i + 1}`;
     }
@@ -52,7 +52,7 @@ class UserService {
     values: any[], 
     dbClient: DBClient = this.dbClientPool.connectionPool
   ) {
-    let filters = '';
+    let filters = "";
 
     for (let i = 0; i < attributes.length; ++i) {
       if (i > 0) {

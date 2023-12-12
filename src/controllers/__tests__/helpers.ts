@@ -5,4 +5,4 @@ export const setTestEnvironmentVars = () => {
   process.env.EMAIL_ADDRESS = "test@foobar.com";
   process.env.EMAIL_PASSWORD = "bar";
   process.env.EMAIL_PROVIDER = "Zoho";
-}
+};
