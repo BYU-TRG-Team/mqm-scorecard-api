@@ -1,6 +1,6 @@
-# MQM Scorecard
+# MQM Scorecard API
 
-An Express.js and React.js translation grading application that follows the [Multidimensional Quality Metrics (MQM)](https://themqm.org) convention.
+This repository contains a Node.js HTTP REST API and PostgreSQL schemas developed to support the [MQM Scorecard application](https://github.com/BYU-TRG-Team/mqm-scorecard).
 
 ## Installation
 
@@ -62,21 +62,6 @@ npm run db:configure
 ```
 npm run start
 ```
-
-## Local Development
-
-For local development, you will want to set the environment variable *APP_ENV*=*development*. To run the application locally, express and react can be run in parallel by running the following commands in different tabs:
-
-```
-npm run dev:server
-```
-
-```
-npm run dev:react
-```
-
-The database will still need to be configured as mentioned in the installation section. Please refer to that section for details.
-
 
 ## Scripts
 

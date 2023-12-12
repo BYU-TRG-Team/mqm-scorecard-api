@@ -14,7 +14,7 @@
     "declaration": true,  
   },
   "include": [
-    "server/**/*",
+    "src/**/*",
     "@types/**/*"
   ]
 }
