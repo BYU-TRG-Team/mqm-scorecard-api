@@ -140,5 +140,5 @@ REFERENCES issues (id) ON DELETE CASCADE
   await bottle.container.DBClientPool.connectionPool.query(createUsersProjects);
   await bottle.container.DBClientPool.connectionPool.query(createSegmentIssuesTable);
   await bottle.container.DBClientPool.connectionPool.end();
-  console.log('Successfully configured database');
+  console.log("Successfully configured database");
 }());

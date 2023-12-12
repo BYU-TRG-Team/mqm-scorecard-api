@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { cleanEnv, str, email, url } from 'envalid'
+import { cleanEnv, str, email, url } from "envalid";
 
 export const constructCleanEnv = () => {
   return cleanEnv(process.env, {

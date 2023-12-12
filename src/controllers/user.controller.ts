@@ -1,11 +1,11 @@
-import bcrypt from 'bcrypt';
-import errorMessages from '../messages/errors.messages';
-import { roles } from '../roles';
-import UserService from '../services/user.service';
-import TokenHandler from '../support/tokenhandler.support';
-import { Logger } from 'winston';
-import { Request, Response } from 'express';
-import { isError } from '../type-guards';
+import bcrypt from "bcrypt";
+import errorMessages from "../messages/errors.messages";
+import { roles } from "../roles";
+import UserService from "../services/user.service";
+import TokenHandler from "../support/tokenhandler.support";
+import { Logger } from "winston";
+import { Request, Response } from "express";
+import { isError } from "../type-guards";
 
 class UserController {
   constructor(
@@ -28,11 +28,11 @@ class UserController {
     const superadminNewAttributes: {[key: string]: any} = {};
 
     Object.keys(req.body).forEach((attr) => {
-      if (['username', 'email', 'name', 'password'].includes(attr)) {
+      if (["username", "email", "name", "password"].includes(attr)) {
         newAttributes[attr] = req.body[attr];
       }
 
-      if (['roleId'].includes(attr)) {
+      if (["roleId"].includes(attr)) {
         superadminNewAttributes[attr] = req.body[attr];
       }
     });
@@ -54,17 +54,17 @@ class UserController {
 
       // Update these attributes regardless of whether the param id is equal to the client's id
       if (
-        req.role === 'superadmin'
+        req.role === "superadmin"
         && Object.keys(superadminNewAttributes).length > 0
       ) {
-        const attributes = ['role_id'];
+        const attributes = ["role_id"];
         const values = [superadminNewAttributes.roleId];
         await this.userService.setAttributes(attributes, values, req.params.id);
       }
 
       if (newAttributes.username) {
         const { newToken, cookieOptions } = await this.tokenHandler.generateUpdatedUserAuthToken(req, newAttributes);
-        res.cookie('scorecard_authtoken', newToken, cookieOptions);
+        res.cookie("scorecard_authtoken", newToken, cookieOptions);
         return res.send({ newToken });
       }
 
@@ -93,7 +93,7 @@ class UserController {
     }
 
     try {
-      const usersQuery = await this.userService.findUsers(['user_id'], [req.params.id]);
+      const usersQuery = await this.userService.findUsers(["user_id"], [req.params.id]);
 
       if (usersQuery.rows.length === 0) {
         return res.status(404).send({ 
@@ -131,7 +131,7 @@ class UserController {
         role_name: roles[String(user.role_id)]
       }));
       
-      return res.json({ users })
+      return res.json({ users });
     } catch (err) {
       if (isError(err)) {
         this.logger.log({

@@ -148,12 +148,12 @@ class ProjectService {
     projectId: any, 
     dbClient: DBClient = this.dbClientPool.connectionPool
   ) {
-    let filters = '';
+    let filters = "";
     const numParams = attributes.length;
 
     for (let i = 0; i < attributes.length; ++i) {
       if (i > 0) {
-        filters += ', ';
+        filters += ", ";
       }
 
       filters += `${attributes[i]} = $${i + 1}`;

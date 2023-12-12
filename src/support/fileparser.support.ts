@@ -6,28 +6,28 @@ interface ParsedBitextFile {
 
 class FileParser {
   parseMetricFile(node: any, parent: any, level = -1): [string, any[]] {
-    let error = '';
+    let error = "";
     const issues = new Array<any>();
 
     if (level > 3) {
-      error = 'Error reading metric file: issues can not be more than three levels deep';
+      error = "Error reading metric file: issues can not be more than three levels deep";
       return [error, issues];
     }
 
     if (level > -1) {
       if (!node.$ || !node.$.type) {
-        error = 'Error reading metric file: issue must have a type attribute';
+        error = "Error reading metric file: issue must have a type attribute";
         return [error, issues];
       }
 
-      if (!node.$ || !node.$.display || !['yes', 'no'].includes(node.$.display.toLowerCase())) {
-        error = 'Error reading metric file: issue must have a display attribute';
+      if (!node.$ || !node.$.display || !["yes", "no"].includes(node.$.display.toLowerCase())) {
+        error = "Error reading metric file: issue must have a display attribute";
         return [error, issues];
       }
 
       issues.push({
         issue: node.$.type,
-        display: node.$.display.toLowerCase() === 'yes',
+        display: node.$.display.toLowerCase() === "yes",
         parent,
       });
     }
@@ -56,32 +56,32 @@ class FileParser {
   }
 
   parseTypologyFile(node: any, parent:any = undefined, level = -1): [string, any[]] {
-    let error = '';
+    let error = "";
     const issueTypes = new Array<any>();
 
     if (level > 3) {
-      error = 'Error reading typology file: error types can not be more than three levels deep';
+      error = "Error reading typology file: error types can not be more than three levels deep";
       return [error, issueTypes];
     }
 
     if (level > -1) {
-      let description = '';
-      let notes = '';
-      let examples = '';
+      let description = "";
+      let notes = "";
+      let examples = "";
 
       if (!node.$.name) {
-        error = 'Error reading typology file: error type must have a name attribute';
+        error = "Error reading typology file: error type must have a name attribute";
         return [error, issueTypes];
       }
 
       if (!node.$.id) {
-        error = 'Error reading typology file: error type must have an id attribute';
+        error = "Error reading typology file: error type must have an id attribute";
         return [error, issueTypes];
       }
 
       if (node.description) {
         if (!Array.isArray(node.description)) {
-          error = 'Error reading typology file: "description" element cannot have any attributes.';
+          error = "Error reading typology file: \"description\" element cannot have any attributes.";
           return [error, issueTypes];
         }
         [description] = node.description;
@@ -89,7 +89,7 @@ class FileParser {
 
       if (node.examples) {
         if ((!Array.isArray(node.examples))) {
-          error = 'Error reading typology file: "examples" element cannot have any attributes.';
+          error = "Error reading typology file: \"examples\" element cannot have any attributes.";
           return [error, issueTypes];
         }
         [examples] = node.examples;
@@ -97,7 +97,7 @@ class FileParser {
 
       if (node.notes) {
         if ((!Array.isArray(node.notes))) {
-          error = 'Error reading typology file: "notes" element cannot have any attributes.';
+          error = "Error reading typology file: \"notes\" element cannot have any attributes.";
           return [error, issueTypes];
         }
         [notes] = node.notes;
@@ -137,24 +137,24 @@ class FileParser {
   }
 
   parseBiColumnBitext(file: any): [string, ParsedBitextFile] {
-    let error = '';
-    const fileHeaders = ['Source', 'Target'];
-    const lines = file.split('\n');
-    let response: ParsedBitextFile = {
+    let error = "";
+    const fileHeaders = ["Source", "Target"];
+    const lines = file.split("\n");
+    const response: ParsedBitextFile = {
       segments: new Array<any>(),
       targetWordCount: 0,
       sourceWordCount: 0,
-    }
+    };
 
     if (lines.length === 1) {
-      error = 'Error reading bitext file: File is blank';
+      error = "Error reading bitext file: File is blank";
       return [error, response];
     }
 
-    const numColumns = lines[0].split('\t').length;
+    const numColumns = lines[0].split("\t").length;
 
     if (numColumns < 2) {
-      error = 'Error reading bitext file: File must have two or more columns';
+      error = "Error reading bitext file: File must have two or more columns";
       return [error, response];
     }
 
@@ -163,7 +163,7 @@ class FileParser {
         return;
       }
 
-      const text = line.split('\t');
+      const text = line.split("\t");
 
       if (text.length !== numColumns) {
         error = `Error reading bitext file in line ${index + 1}`;
@@ -178,7 +178,7 @@ class FileParser {
 
       const specificationObject: {[key: string]: string} = {};
       text.forEach((str: any, i: any) => {
-        const wordCount = str.split(' ').length;
+        const wordCount = str.split(" ").length;
         if (i === 0) {
           response.sourceWordCount += wordCount;
         }
@@ -201,15 +201,15 @@ class FileParser {
 
     try {
       node.sts.section.forEach((section: any) => {
-        const newSpecification = { name: '', sections: new Array<any>() };
+        const newSpecification = { name: "", sections: new Array<any>() };
         newSpecification.name = section.$.name;
 
         section.parameter.forEach((param: any) => {
-          const newSection = { name: '', subsections: new Array<any>() };
+          const newSection = { name: "", subsections: new Array<any>() };
           newSection.name = `[${param.$.number}] ${param.$.name}`;
 
           param.subparameter.forEach((subparam: any) => {
-            const newSubsection = { name: '', contentList: new Array<any>() };
+            const newSubsection = { name: "", contentList: new Array<any>() };
             newSubsection.name = `[${subparam.$.number}] ${subparam.$.name}`;
 
             subparam.value.forEach((val: any) => {
@@ -225,9 +225,9 @@ class FileParser {
         specificationsJSON.specifications.push(newSpecification);
       });
 
-      return ['', JSON.stringify(specificationsJSON)];
+      return ["", JSON.stringify(specificationsJSON)];
     } catch (error) {
-      return ['Error parsing specifications file', ''];
+      return ["Error parsing specifications file", ""];
     }
   }
 }

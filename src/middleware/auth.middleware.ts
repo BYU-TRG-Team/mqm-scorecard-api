@@ -1,6 +1,6 @@
-import jwt from 'jsonwebtoken';
-import jwtDecode from 'jwt-decode';
-import errorMessages from '../messages/errors.messages';
+import jwt from "jsonwebtoken";
+import jwtDecode from "jwt-decode";
+import errorMessages from "../messages/errors.messages";
 import { Request, Response, NextFunction } from "express";
 import { CleanEnv } from  "../clean-env";
 

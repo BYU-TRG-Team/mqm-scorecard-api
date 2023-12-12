@@ -1,25 +1,25 @@
-import { setTestEnvironmentVars } from '../helpers';
-import ProjectService from '../../../services/project.service';
-import { constructBottle } from '../../../bottle';
-import { getMockReq, getMockRes } from '@jest-mock/express';
+import { setTestEnvironmentVars } from "../helpers";
+import ProjectService from "../../../services/project.service";
+import { constructBottle } from "../../../bottle";
+import { getMockReq, getMockRes } from "@jest-mock/express";
 
 jest.mock("pg");
-jest.mock('nodemailer');
+jest.mock("nodemailer");
 
-describe('tests deleteUserFromProject method', () => {
+describe("tests deleteUserFromProject method", () => {
   beforeEach(() => {
     setTestEnvironmentVars();
     jest.restoreAllMocks();
   });
 
-  it('should successfully delete project that is not assigned to the user', async () => {
+  it("should successfully delete project that is not assigned to the user", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        name: 'test',
+        name: "test",
       },
-      role: 'superadmin',
+      role: "superadmin",
       params: {
         projectId: "2",
         userId: "1",
@@ -33,7 +33,7 @@ describe('tests deleteUserFromProject method', () => {
       rowCount: 1, 
       oid: 0, 
       fields: [] 
-    })
+    });
 
     await bottle.container.ProjectController.deleteUserFromProject(req, res);
 
@@ -46,14 +46,14 @@ describe('tests deleteUserFromProject method', () => {
     expect(res.send).toHaveBeenCalledTimes(1);
   });
 
-  it('should successfully delete project that is assigned to the user', async () => {
+  it("should successfully delete project that is assigned to the user", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        name: 'test',
+        name: "test",
       },
-      role: 'user',
+      role: "user",
       params: {
         projectId: "1",
         userId: "1",
@@ -67,7 +67,7 @@ describe('tests deleteUserFromProject method', () => {
       rowCount: 1, 
       oid: 0, 
       fields: [] 
-    })
+    });
 
     await bottle.container.ProjectController.deleteUserFromProject(req, res);
 
@@ -80,14 +80,14 @@ describe('tests deleteUserFromProject method', () => {
     expect(res.send).toHaveBeenCalledTimes(1);
   });
 
-  it('should fail to delete project that is not assigned to the user', async () => {
+  it("should fail to delete project that is not assigned to the user", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        name: 'test',
+        name: "test",
       },
-      role: 'user',
+      role: "user",
       params: {
         projectId: "2",
         userId: "1",
@@ -100,7 +100,7 @@ describe('tests deleteUserFromProject method', () => {
       rowCount: 1, 
       oid: 0, 
       fields: [] 
-    })
+    });
 
     await bottle.container.ProjectController.deleteUserFromProject(req, res);
 
@@ -109,7 +109,7 @@ describe('tests deleteUserFromProject method', () => {
     
     expect(res.json).toHaveBeenCalledTimes(1);
     expect(res.json).toHaveBeenCalledWith({
-      message: 'Access Forbidden',
+      message: "Access Forbidden",
     });
   });
 });

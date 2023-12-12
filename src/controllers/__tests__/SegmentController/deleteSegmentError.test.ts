@@ -1,27 +1,27 @@
 import { getMockReq, getMockRes } from "@jest-mock/express";
-import { constructBottle } from '../../../bottle';
+import { constructBottle } from "../../../bottle";
 import SegmentService from "../../../services/segment.service";
 import ProjectService from  "../../../services/project.service";
 import IssueService from "../../../services/issue.service";
-import { setTestEnvironmentVars } from '../helpers';
+import { setTestEnvironmentVars } from "../helpers";
 
 jest.mock("pg");
-jest.mock('nodemailer');
+jest.mock("nodemailer");
 
-describe('tests deleteSegmentIssue method', () => {
+describe("tests deleteSegmentIssue method", () => {
   beforeEach(() => {
     setTestEnvironmentVars();
     jest.restoreAllMocks();
   });
 
-  it('should throw a 404 error', async () => {
+  it("should throw a 404 error", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       params: {
         errorId: "10",
       },
-      role: 'user',
+      role: "user",
     });
 
     jest.spyOn(SegmentService.prototype, "getSegmentByIssueId").mockResolvedValueOnce({ 
@@ -38,14 +38,14 @@ describe('tests deleteSegmentIssue method', () => {
     expect(res.status).toHaveBeenCalledWith(404);
   });
 
-  it('should throw a 403 error', async () => {
+  it("should throw a 403 error", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       params: {
         errorId: "10",
       },
-      role: 'user',
+      role: "user",
     });
 
     jest.spyOn(SegmentService.prototype, "getSegmentByIssueId").mockResolvedValueOnce({ 
@@ -69,14 +69,14 @@ describe('tests deleteSegmentIssue method', () => {
     expect(res.status).toHaveBeenCalledWith(403);
   });
 
-  it('should call deleteSegmentIssueById with errorId', async () => {
+  it("should call deleteSegmentIssueById with errorId", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       params: {
         errorId: "10",
       },
-      role: 'user',
+      role: "user",
     });
 
     jest.spyOn(IssueService.prototype, "deleteSegmentIssueById");

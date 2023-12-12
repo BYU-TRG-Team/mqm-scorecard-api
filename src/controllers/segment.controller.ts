@@ -1,10 +1,10 @@
-import { Logger } from 'winston';
-import errorMessages from '../messages/errors.messages';
-import IssueService from '../services/issue.service';
-import ProjectService from '../services/project.service';
-import SegmentService from '../services/segment.service';
-import { Request, Response } from 'express';
-import { isError } from '../type-guards';
+import { Logger } from "winston";
+import errorMessages from "../messages/errors.messages";
+import IssueService from "../services/issue.service";
+import ProjectService from "../services/project.service";
+import SegmentService from "../services/segment.service";
+import { Request, Response } from "express";
+import { isError } from "../type-guards";
 
 class SegmentController {
   constructor(
@@ -37,7 +37,7 @@ class SegmentController {
 
     if (note === undefined || highlighting === undefined || issue === undefined || level === undefined || type === undefined || highlightStartIndex === undefined || highlightEndIndex === undefined) {
       return res.status(400).send({ 
-        message: 'Body must include note, highlighting, issue, level, type, highlightStartIndex, and highlightEndIndex' 
+        message: "Body must include note, highlighting, issue, level, type, highlightStartIndex, and highlightEndIndex" 
       });
     }
 
@@ -46,7 +46,7 @@ class SegmentController {
 
       if (segmentResponse.rows.length === 0) {
         return res.status(404).send({ 
-          message: 'No segment found' 
+          message: "No segment found" 
         });
       }
 
@@ -83,7 +83,7 @@ class SegmentController {
 
       if (segmentResponse.rows.length === 0) {
         return res.status(404).send({ 
-          message: 'No segment found' 
+          message: "No segment found" 
         });
       }
 
@@ -126,7 +126,7 @@ class SegmentController {
       const segmentResponse = await this.segmentService.getSegmentByIssueId(req.params.issueId);
 
       if (segmentResponse.rows.length === 0) {
-        return res.status(400).send({ message: 'No segment found' });
+        return res.status(400).send({ message: "No segment found" });
       }
 
       const segment = segmentResponse.rows[0];
@@ -164,7 +164,7 @@ class SegmentController {
   }
 
   async isUserAssignedToProject(req: Request, projectId: string) {
-    if (req.role === 'superadmin') {
+    if (req.role === "superadmin") {
       return true;
     }
 

@@ -1,19 +1,19 @@
 import AuthController from "../../auth.controller";
 import { getMockReq, getMockRes } from "@jest-mock/express";
-import { constructBottle } from '../../../bottle';
-import UserService from '../../../services/user.service';
+import { constructBottle } from "../../../bottle";
+import UserService from "../../../services/user.service";
 import { setTestEnvironmentVars } from "../helpers";
 
 jest.mock("pg");
-jest.mock('nodemailer');
+jest.mock("nodemailer");
 
-describe('tests recovery method', () => {
+describe("tests recovery method", () => {
   beforeEach(() => {
     jest.restoreAllMocks();
     setTestEnvironmentVars();
   });
   
-  it('should throw a 400 error for invalid body', async () => {
+  it("should throw a 400 error for invalid body", async () => {
     const bottle = constructBottle();
     const req = getMockReq();
     const { res } = getMockRes();
@@ -25,20 +25,20 @@ describe('tests recovery method', () => {
 
     expect(res.send).toHaveBeenCalledTimes(1);
     expect(res.send).toHaveBeenCalledWith({ 
-      message: 'Body must include email' 
+      message: "Body must include email" 
     });
   });
 
-  it('should redirect to /recover/sent but not send a password reset email', async () => {
+  it("should redirect to /recover/sent but not send a password reset email", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        email: 'test',
+        email: "test",
       },
     });
     
-    jest.spyOn(AuthController.prototype, 'sendPasswordResetEmail');
+    jest.spyOn(AuthController.prototype, "sendPasswordResetEmail");
     jest.spyOn(UserService.prototype, "findUsers").mockResolvedValueOnce({ 
       rows: [], 
       command: "", 
@@ -50,26 +50,26 @@ describe('tests recovery method', () => {
     await bottle.container.AuthController.recovery(req, res);
 
     expect(res.redirect).toHaveBeenCalledTimes(1);
-    expect(res.redirect).toHaveBeenCalledWith('/recover/sent');
+    expect(res.redirect).toHaveBeenCalledWith("/recover/sent");
 
     expect(AuthController.prototype.sendPasswordResetEmail).toHaveBeenCalledTimes(0);
   });
 
-  it('should redirect to /recover/sent and send a password reset email', async () => {
+  it("should redirect to /recover/sent and send a password reset email", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        email: 'test',
+        email: "test",
       },
       headers: {
-        host: 'test',
+        host: "test",
       },
     });
 
-    jest.spyOn(AuthController.prototype, 'sendPasswordResetEmail');
+    jest.spyOn(AuthController.prototype, "sendPasswordResetEmail");
     jest.spyOn(UserService.prototype, "findUsers").mockResolvedValueOnce({ 
-      rows: [{ test: 'test' }], 
+      rows: [{ test: "test" }], 
       command: "", 
       rowCount: 1, 
       oid: 0, 
@@ -86,12 +86,12 @@ describe('tests recovery method', () => {
     await bottle.container.AuthController.recovery(req, res);
 
     expect(res.redirect).toHaveBeenCalledTimes(1);
-    expect(res.redirect).toHaveBeenCalledWith('/recover/sent');
+    expect(res.redirect).toHaveBeenCalledWith("/recover/sent");
 
     expect(AuthController.prototype.sendPasswordResetEmail).toHaveBeenCalledTimes(1);
     expect(AuthController.prototype.sendPasswordResetEmail).toHaveBeenCalledWith(
       req,
-      { test: 'test' }
+      { test: "test" }
     );
   });
 });

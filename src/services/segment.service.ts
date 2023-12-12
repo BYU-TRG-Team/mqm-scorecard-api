@@ -22,7 +22,7 @@ class SegmentService {
 
     segments.forEach((segment: any, i: number) => {
       if (initialized) {
-        query += ', ';
+        query += ", ";
       } else {
         initialized = true;
       }
@@ -40,7 +40,7 @@ class SegmentService {
     values: any[], 
     dbClient: DBClient = this.dbClientPool.connectionPool
   ) {
-    let filters = '';
+    let filters = "";
 
     for (let i = 0; i < attributes.length; ++i) {
       if (i > 0) {
@@ -97,12 +97,12 @@ class SegmentService {
     segmentId: any, 
     dbClient: DBClient = this.dbClientPool.connectionPool
   ) {
-    let filters = '';
+    let filters = "";
     const numParams = attributes.length;
 
     for (let i = 0; i < attributes.length; ++i) {
       if (i > 0) {
-        filters += ', ';
+        filters += ", ";
       }
 
       filters += `${attributes[i]} = $${i + 1}`;
@@ -118,4 +118,4 @@ class SegmentService {
   }
 }
 
-export default SegmentService
+export default SegmentService;

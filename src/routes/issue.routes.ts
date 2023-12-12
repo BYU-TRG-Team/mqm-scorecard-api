@@ -4,18 +4,18 @@ import { Express } from "express";
 
 export default (app: Express, bottle: Bottle) => {
   app.post(
-    '/api/issues',
+    "/api/issues",
     verifyToken(bottle.container.CleanEnv),
     checkVerification,
-    checkRole(['superadmin']),
+    checkRole(["superadmin"]),
     bottle.container.IssueController.updateTypology.bind(bottle.container.IssueController),
   );
 
   app.get(
-    '/api/issues',
+    "/api/issues",
     verifyToken(bottle.container.CleanEnv),
     checkVerification,
-    checkRole(['admin', 'superadmin']),
+    checkRole(["admin", "superadmin"]),
     bottle.container.IssueController.getTypology.bind(bottle.container.IssueController),
   );
 };

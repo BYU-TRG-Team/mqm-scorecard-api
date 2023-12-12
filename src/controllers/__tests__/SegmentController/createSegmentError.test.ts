@@ -1,35 +1,35 @@
-import { getMockReq, getMockRes } from '@jest-mock/express';
-import { constructBottle } from '../../../bottle';
-import SegmentService from '../../../services/segment.service';
-import ProjectService from '../../../services/project.service';
-import IssueService from '../../../services/issue.service';
-import { setTestEnvironmentVars } from '../helpers';
+import { getMockReq, getMockRes } from "@jest-mock/express";
+import { constructBottle } from "../../../bottle";
+import SegmentService from "../../../services/segment.service";
+import ProjectService from "../../../services/project.service";
+import IssueService from "../../../services/issue.service";
+import { setTestEnvironmentVars } from "../helpers";
 
 jest.mock("pg");
-jest.mock('nodemailer');
+jest.mock("nodemailer");
 
-describe('tests createSegmentIssue method', () => {
+describe("tests createSegmentIssue method", () => {
   beforeEach(() => {
     setTestEnvironmentVars();
     jest.restoreAllMocks();
   });
 
-  it('should throw a 400 error', async () => {
+  it("should throw a 400 error", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        note: 'test',
-        highlighting: 'test',
-        issue: 'test',
-        level: 'test',
-        type: 'test',
-        highlightStartIndex: 'test',
+        note: "test",
+        highlighting: "test",
+        issue: "test",
+        level: "test",
+        type: "test",
+        highlightStartIndex: "test",
       },
       params: {
         segmentId: "10",
       },
-      role: 'user',
+      role: "user",
     });
 
     await bottle.container.SegmentController.createSegmentIssue(req, res);
@@ -38,23 +38,23 @@ describe('tests createSegmentIssue method', () => {
     expect(res.status).toHaveBeenCalledWith(400);
   });
 
-  it('should throw a 404 error', async () => {
+  it("should throw a 404 error", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        note: 'test',
-        highlighting: 'test',
-        issue: 'test',
-        level: 'test',
-        type: 'test',
-        highlightStartIndex: 'test',
-        highlightEndIndex: 'test',
+        note: "test",
+        highlighting: "test",
+        issue: "test",
+        level: "test",
+        type: "test",
+        highlightStartIndex: "test",
+        highlightEndIndex: "test",
       },
       params: {
         segmentId: "10",
       },
-      role: 'user',
+      role: "user",
     });
 
     jest.spyOn(SegmentService.prototype, "getSegmentById").mockResolvedValueOnce({ 
@@ -71,23 +71,23 @@ describe('tests createSegmentIssue method', () => {
     expect(res.status).toHaveBeenCalledWith(404);
   });
 
-  it('should throw a 403 error', async () => {
+  it("should throw a 403 error", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        note: 'test',
-        highlighting: 'test',
-        issue: 'test',
-        level: 'test',
-        type: 'test',
-        highlightStartIndex: 'test',
-        highlightEndIndex: 'test',
+        note: "test",
+        highlighting: "test",
+        issue: "test",
+        level: "test",
+        type: "test",
+        highlightStartIndex: "test",
+        highlightEndIndex: "test",
       },
       params: {
         segmentId: "10",
       },
-      role: 'user',
+      role: "user",
     });
 
     jest.spyOn(SegmentService.prototype, "getSegmentById").mockResolvedValueOnce({ 
@@ -118,23 +118,23 @@ describe('tests createSegmentIssue method', () => {
     expect(res.status).toHaveBeenCalledWith(403);
   });
 
-  it('should call addSegmentIssue with segmentId, note, highlighting, issue, level, type, highlightStartIndex, highlightEndIndex', async () => {
+  it("should call addSegmentIssue with segmentId, note, highlighting, issue, level, type, highlightStartIndex, highlightEndIndex", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        note: 'test note',
-        highlighting: 'tes highlighting',
-        issue: 'test issue',
-        level: 'test level ',
-        type: 'test type',
-        highlightStartIndex: '0',
-        highlightEndIndex: '10',
+        note: "test note",
+        highlighting: "tes highlighting",
+        issue: "test issue",
+        level: "test level ",
+        type: "test type",
+        highlightStartIndex: "0",
+        highlightEndIndex: "10",
       },
       params: {
         segmentId: "10",
       },
-      role: 'user',
+      role: "user",
     });
     
     jest.spyOn(IssueService.prototype, "addSegmentIssue");

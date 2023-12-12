@@ -1,32 +1,32 @@
-import bcrypt from 'bcrypt';
-import AuthController from '../../auth.controller';
-import { getMockReq, getMockRes } from '@jest-mock/express';
-import UserService from '../../../services/user.service';
-import { constructBottle } from '../../../bottle';
-import TokenService from '../../../services/token.service';
-import DBClientPool from '../../../db-client-pool';
-import { setTestEnvironmentVars } from '../helpers';
-import TokenHandler from '../../../support/tokenhandler.support';
+import bcrypt from "bcrypt";
+import AuthController from "../../auth.controller";
+import { getMockReq, getMockRes } from "@jest-mock/express";
+import UserService from "../../../services/user.service";
+import { constructBottle } from "../../../bottle";
+import TokenService from "../../../services/token.service";
+import DBClientPool from "../../../db-client-pool";
+import { setTestEnvironmentVars } from "../helpers";
+import TokenHandler from "../../../support/tokenhandler.support";
 
 jest.mock("pg");
-jest.mock('nodemailer');
+jest.mock("nodemailer");
 
-describe('tests signup method', () => {
+describe("tests signup method", () => {
   beforeEach(() => {
     jest.restoreAllMocks();
     setTestEnvironmentVars();
   });
   
-  it('should throw a 400 error', async () => {
+  it("should throw a 400 error", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        username: 'test',
-        email: 'test',
-        password: 'test',
+        username: "test",
+        email: "test",
+        password: "test",
       },
-      role: 'user',
+      role: "user",
     });
 
     await bottle.container.AuthController.signup(req, res);
@@ -35,25 +35,25 @@ describe('tests signup method', () => {
     expect(res.status).toHaveBeenCalledWith(400);
   });
 
-  it('should create a new user and send a verification email', async () => {
+  it("should create a new user and send a verification email", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        username: 'test',
-        email: 'test',
-        password: 'test',
-        name: 'test',
+        username: "test",
+        email: "test",
+        password: "test",
+        name: "test",
       },
       headers: {
-        host: 'test',
+        host: "test",
       },
     });
     
     jest.spyOn(DBClientPool.prototype, "beginTransaction");
     jest.spyOn(DBClientPool.prototype, "commitTransaction");
-    jest.spyOn(AuthController.prototype, 'sendVerificationEmail');
-    jest.spyOn(TokenHandler.prototype, 'generateEmailVerificationToken').mockReturnValueOnce("foobar");
+    jest.spyOn(AuthController.prototype, "sendVerificationEmail");
+    jest.spyOn(TokenHandler.prototype, "generateEmailVerificationToken").mockReturnValueOnce("foobar");
     jest.spyOn(TokenService.prototype, "create").mockResolvedValueOnce({ 
       rows: [], 
       command: "", 
@@ -91,7 +91,7 @@ describe('tests signup method', () => {
     expect(createUserCall[4]).toBe(req.body.name);
     expect(createUserCall[5]).not.toBeUndefined();
     const passwordIsValid = bcrypt.compareSync(
-      'test',
+      "test",
       createUserCall[2],
     );
     expect(passwordIsValid).toBeTruthy();

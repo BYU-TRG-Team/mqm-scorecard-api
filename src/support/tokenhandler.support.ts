@@ -23,7 +23,7 @@ class TokenHandler {
       expires: rememberMe ? new Date(604800000 + Date.now()) : undefined,
       httpOnly: false,
       secure: false,
-      sameSite: 'strict',
+      sameSite: "strict",
     };
 
     return {
@@ -39,12 +39,12 @@ class TokenHandler {
   }
 
   generateEmailVerificationToken() {
-    return crypto.randomBytes(20).toString('hex');
+    return crypto.randomBytes(20).toString("hex");
   }
 
   generatePasswordResetToken() {
     return {
-      resetPasswordToken: crypto.randomBytes(20).toString('hex'),
+      resetPasswordToken: crypto.randomBytes(20).toString("hex"),
       resetPasswordTokenCreatedAt: new Date().toISOString(),
     };
   }
@@ -64,7 +64,7 @@ class TokenHandler {
       expires: req.body.rememberMe ? new Date(604800000 + Date.now()) : undefined,
       httpOnly: false,
       secure: false,
-      sameSite: 'strict',
+      sameSite: "strict",
     };
 
     return {

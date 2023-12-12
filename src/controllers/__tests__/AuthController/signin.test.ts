@@ -1,27 +1,27 @@
-import bcrypt from 'bcrypt';
-import jwtDecode from 'jwt-decode';
-import { getMockReq, getMockRes } from '@jest-mock/express';
-import { constructBottle } from '../../../bottle';
-import { setTestEnvironmentVars } from '../helpers';
-import UserService from '../../../services/user.service';
+import bcrypt from "bcrypt";
+import jwtDecode from "jwt-decode";
+import { getMockReq, getMockRes } from "@jest-mock/express";
+import { constructBottle } from "../../../bottle";
+import { setTestEnvironmentVars } from "../helpers";
+import UserService from "../../../services/user.service";
 
 jest.mock("pg");
-jest.mock('nodemailer');
+jest.mock("nodemailer");
 
-describe('tests signin method', () => {
+describe("tests signin method", () => {
   beforeEach(() => {
     jest.restoreAllMocks();
     setTestEnvironmentVars();
   });
   
-  it('should throw a 400 error for invalid body', async () => {
+  it("should throw a 400 error for invalid body", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        username: 'test',
+        username: "test",
       },
-      role: 'user',
+      role: "user",
     });
 
     await bottle.container.AuthController.signin(req, res);
@@ -31,19 +31,19 @@ describe('tests signin method', () => {
 
     expect(res.send).toHaveBeenCalledTimes(1);
     expect(res.send).toHaveBeenCalledWith({ 
-      message: 'Body must include a username and password' 
+      message: "Body must include a username and password" 
     });
   });
 
-  it('should throw a 400 error for no found user', async () => {
+  it("should throw a 400 error for no found user", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        username: 'test',
-        password: 'test',
+        username: "test",
+        password: "test",
       },
-      role: 'user',
+      role: "user",
     });
 
     jest.spyOn(UserService.prototype, "findUsers").mockResolvedValueOnce({ 
@@ -61,26 +61,26 @@ describe('tests signin method', () => {
 
     expect(UserService.prototype.findUsers).toHaveBeenCalledTimes(1);
     expect(UserService.prototype.findUsers).toHaveBeenCalledWith(
-      ['username'],
+      ["username"],
       [req.body.username]
     );
 
     expect(res.send).toHaveBeenCalledTimes(1);
     expect(res.send).toHaveBeenCalledWith({ 
-      message: 'Username or password is incorrect. Please try again.' 
+      message: "Username or password is incorrect. Please try again." 
     });
   });
 
-  it('should throw a 400 error for invalid password', async () => {
+  it("should throw a 400 error for invalid password", async () => {
     const bottle = constructBottle();
-    const hashedPassword = await bcrypt.hash('foo', 10);
+    const hashedPassword = await bcrypt.hash("foo", 10);
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        username: 'test',
-        password: 'test',
+        username: "test",
+        password: "test",
       },
-      role: 'user',
+      role: "user",
     });
     
     jest.spyOn(UserService.prototype, "findUsers").mockResolvedValueOnce({ 
@@ -98,24 +98,24 @@ describe('tests signin method', () => {
 
     expect(UserService.prototype.findUsers).toHaveBeenCalledTimes(1);
     expect(UserService.prototype.findUsers).toHaveBeenCalledWith(
-      ['username'],
+      ["username"],
       [req.body.username]
-    )
+    );
 
     expect(res.send).toHaveBeenCalledTimes(1);
-    expect(res.send).toHaveBeenCalledWith({ message: 'Username or password is incorrect. Please try again.' });
+    expect(res.send).toHaveBeenCalledWith({ message: "Username or password is incorrect. Please try again." });
   });
 
-  it('should successfully create a jwt token with rememberMe as false', async () => {
-    const hashedPassword = await bcrypt.hash('test', 10);
+  it("should successfully create a jwt token with rememberMe as false", async () => {
+    const hashedPassword = await bcrypt.hash("test", 10);
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        username: 'test',
-        password: 'test',
+        username: "test",
+        password: "test",
       },
-      role: 'user',
+      role: "user",
     });
 
     jest.spyOn(UserService.prototype, "findUsers").mockResolvedValueOnce({ 
@@ -124,7 +124,7 @@ describe('tests signin method', () => {
         user_id: 1, 
         role_id: 1, 
         verified: true, 
-        username: 'test',
+        username: "test",
       }], 
       command: "", 
       rowCount: 1, 
@@ -136,18 +136,18 @@ describe('tests signin method', () => {
 
     expect(res.cookie).toHaveBeenCalledTimes(1);
     const [mockResCookieCall] = (res.cookie as jest.Mock).mock.calls;
-    expect(mockResCookieCall[0]).toBe('scorecard_authtoken');
+    expect(mockResCookieCall[0]).toBe("scorecard_authtoken");
     expect(jwtDecode(mockResCookieCall[1])).toMatchObject({
       id: 1,
-      role: 'user',
+      role: "user",
       verified: true,
-      username: 'test',
+      username: "test",
       rememberMe: false,
     });
     expect(mockResCookieCall[2]).toMatchObject({
       httpOnly: false,
       secure: false,
-      sameSite: 'strict',
+      sameSite: "strict",
     });
 
     expect(res.json).toHaveBeenCalledTimes(1);
@@ -156,17 +156,17 @@ describe('tests signin method', () => {
     });
   });
 
-  it('should successfully create a jwt token with rememberMe as true', async () => {
-    const hashedPassword = await bcrypt.hash('test', 10);
+  it("should successfully create a jwt token with rememberMe as true", async () => {
+    const hashedPassword = await bcrypt.hash("test", 10);
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        username: 'test',
-        password: 'test',
+        username: "test",
+        password: "test",
         rememberMe: true,
       },
-      role: 'user',
+      role: "user",
     });
 
     jest.spyOn(UserService.prototype, "findUsers").mockResolvedValueOnce({ 
@@ -175,7 +175,7 @@ describe('tests signin method', () => {
         user_id: 1, 
         role_id: 1, 
         verified: true, 
-        username: 'test',
+        username: "test",
       }], 
       command: "", 
       rowCount: 1, 
@@ -187,18 +187,18 @@ describe('tests signin method', () => {
 
     expect(res.cookie).toHaveBeenCalledTimes(1);
     const [mockResCookieCall] = (res.cookie as jest.Mock).mock.calls;
-    expect(mockResCookieCall[0]).toBe('scorecard_authtoken');
+    expect(mockResCookieCall[0]).toBe("scorecard_authtoken");
     expect(jwtDecode(mockResCookieCall[1])).toMatchObject({
       id: 1,
-      role: 'user',
+      role: "user",
       verified: true,
-      username: 'test',
+      username: "test",
       rememberMe: true,
     });
     expect(mockResCookieCall[2]).toMatchObject({
       httpOnly: false,
       secure: false,
-      sameSite: 'strict',
+      sameSite: "strict",
     });
 
     expect(res.json).toHaveBeenCalledTimes(1);

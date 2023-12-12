@@ -1,23 +1,23 @@
-import { setTestEnvironmentVars } from '../helpers';
-import { constructBottle } from '../../../bottle';
-import { getMockReq, getMockRes } from '@jest-mock/express';
-import UserService from '../../../services/user.service'
-import ProjectService from '../../../services/project.service';
+import { setTestEnvironmentVars } from "../helpers";
+import { constructBottle } from "../../../bottle";
+import { getMockReq, getMockRes } from "@jest-mock/express";
+import UserService from "../../../services/user.service";
+import ProjectService from "../../../services/project.service";
 
 jest.mock("pg");
-jest.mock('nodemailer');
+jest.mock("nodemailer");
 
-describe('tests addUserToProject method', () => {
+describe("tests addUserToProject method", () => {
   beforeEach(() => {
     setTestEnvironmentVars();
     jest.restoreAllMocks();
   });
 
-  it('should fail due to invalid body', async () => {
+  it("should fail due to invalid body", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
-      role: 'superadmin',
+      role: "superadmin",
       params: {
         projectId: "1",
       },
@@ -30,18 +30,18 @@ describe('tests addUserToProject method', () => {
 
     expect(res.json).toHaveBeenCalledTimes(1);
     expect(res.json).toHaveBeenCalledWith({
-      message: 'Body must include a username',
+      message: "Body must include a username",
     });
   });
 
-  it('should fail with no user found', async () => {
+  it("should fail with no user found", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        username: 'test',
+        username: "test",
       },
-      role: 'superadmin',
+      role: "superadmin",
       params: {
         projectId: "1",
       },
@@ -66,7 +66,7 @@ describe('tests addUserToProject method', () => {
 
     expect(UserService.prototype.findUsers).toHaveBeenCalledTimes(1);
     expect(UserService.prototype.findUsers).toHaveBeenCalledWith(
-      ['username'],
+      ["username"],
       [req.body.username]
     );
 
@@ -79,13 +79,13 @@ describe('tests addUserToProject method', () => {
     });
   });
 
-  it('should fail since user is already assigned', async () => {
+  it("should fail since user is already assigned", async () => {
     const bottle = constructBottle();
     const req = getMockReq({
       body: {
-        username: 'test',
+        username: "test",
       },
-      role: 'superadmin',
+      role: "superadmin",
       params: {
         projectId: "1",
       },
@@ -109,19 +109,19 @@ describe('tests addUserToProject method', () => {
       fields: [] 
     });
     jest.spyOn(ProjectService.prototype, "mapUsertoProject").mockRejectedValueOnce({
-      code: '23505',
+      code: "23505",
     });
 
     await bottle.container.ProjectController.addUserToProject(req, res);
 
     expect(UserService.prototype.findUsers).toHaveBeenCalledTimes(1);
     expect(UserService.prototype.findUsers).toHaveBeenCalledWith(
-      ['username'],
+      ["username"],
       [req.body.username]
     );
 
     expect(ProjectService.prototype.mapUsertoProject).toHaveBeenCalledTimes(1);
-    expect(ProjectService.prototype.mapUsertoProject).toHaveBeenCalledWith("1", "1")
+    expect(ProjectService.prototype.mapUsertoProject).toHaveBeenCalledWith("1", "1");
 
     expect(res.status).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(409);
@@ -132,14 +132,14 @@ describe('tests addUserToProject method', () => {
     });
   });
 
-  it('should successfully map user to project that is not assigned to it', async () => {
+  it("should successfully map user to project that is not assigned to it", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        username: 'test',
+        username: "test",
       },
-      role: 'superadmin',
+      role: "superadmin",
       params: {
         projectId: "1",
       },
@@ -165,7 +165,7 @@ describe('tests addUserToProject method', () => {
 
     expect(UserService.prototype.findUsers).toHaveBeenCalledTimes(1);
     expect(UserService.prototype.findUsers).toHaveBeenCalledWith(
-      ['username'],
+      ["username"],
       [req.body.username]
     );
 
@@ -178,14 +178,14 @@ describe('tests addUserToProject method', () => {
     expect(res.send).toHaveBeenCalledTimes(1);
   });
 
-  it('should fail to add user to project that is not assigned to project', async () => {
+  it("should fail to add user to project that is not assigned to project", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        username: 'test',
+        username: "test",
       },
-      role: 'admin',
+      role: "admin",
       params: {
         projectId: "1",
       },
@@ -206,18 +206,18 @@ describe('tests addUserToProject method', () => {
 
     expect(res.json).toHaveBeenCalledTimes(1);
     expect(res.json).toHaveBeenCalledWith({
-      message: 'Access Forbidden',
+      message: "Access Forbidden",
     });
   });
 
-  it('should successfully map user to project that it is assigned to', async () => {
+  it("should successfully map user to project that it is assigned to", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        username: 'test',
+        username: "test",
       },
-      role: 'admin',
+      role: "admin",
       params: {
         projectId: "1",
       },
@@ -243,12 +243,12 @@ describe('tests addUserToProject method', () => {
 
     expect(UserService.prototype.findUsers).toHaveBeenCalledTimes(1);
     expect(UserService.prototype.findUsers).toBeCalledWith(
-      ['username'],
+      ["username"],
       [req.body.username]
     );
 
     expect(ProjectService.prototype.mapUsertoProject).toHaveBeenCalledTimes(1);
-    expect(ProjectService.prototype.mapUsertoProject).toHaveBeenCalledWith("1", "1")
+    expect(ProjectService.prototype.mapUsertoProject).toHaveBeenCalledWith("1", "1");
 
     expect(res.status).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(204);

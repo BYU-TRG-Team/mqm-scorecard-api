@@ -1,27 +1,27 @@
-import { getMockReq, getMockRes } from '@jest-mock/express';
-import { constructBottle } from '../../../bottle';
+import { getMockReq, getMockRes } from "@jest-mock/express";
+import { constructBottle } from "../../../bottle";
 import ProjectService from "../../../services/project.service";
-import IssueService from '../../../services/issue.service';
-import SegmentService from '../../../services/segment.service';
-import { setTestEnvironmentVars } from '../helpers';
+import IssueService from "../../../services/issue.service";
+import SegmentService from "../../../services/segment.service";
+import { setTestEnvironmentVars } from "../helpers";
 
 jest.mock("pg");
-jest.mock('nodemailer');
+jest.mock("nodemailer");
 
-describe('tests getProject method', () => {
+describe("tests getProject method", () => {
   beforeEach(() => {
     setTestEnvironmentVars();
     jest.restoreAllMocks();
   });
 
-  it('should successfully get project not assigned to user', async () => {
+  it("should successfully get project not assigned to user", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        name: 'test',
+        name: "test",
       },
-      role: 'superadmin',
+      role: "superadmin",
       params: {
         projectId: "2",
       },
@@ -42,7 +42,7 @@ describe('tests getProject method', () => {
       fields: [] 
     });
     jest.spyOn(ProjectService.prototype, "getProjectUsersById").mockResolvedValueOnce({ 
-      rows: [{ testUser: 'test' }], 
+      rows: [{ testUser: "test" }], 
       command: "", 
       rowCount: 1, 
       oid: 0, 
@@ -51,10 +51,10 @@ describe('tests getProject method', () => {
     jest.spyOn(IssueService.prototype, "getProjectIssuesById").mockResolvedValueOnce({ 
       rows: [
         {
-          issue: 'fluency', parent: 'custom', name: 'Fluency', description: '', notes: '', examples: '',
+          issue: "fluency", parent: "custom", name: "Fluency", description: "", notes: "", examples: "",
         },
         {
-          issue: 'custom', parent: null, name: 'Custom', description: '', notes: '', examples: '',
+          issue: "custom", parent: null, name: "Custom", description: "", notes: "", examples: "",
         }
       ], 
       command: "", 
@@ -64,8 +64,8 @@ describe('tests getProject method', () => {
     });
     jest.spyOn(IssueService.prototype, "getProjectReportById").mockResolvedValue({ 
       rows: [
-        { issue: 'custom', level: ['critical', 'minor'], type: ['source', 'target'] },
-        { issue: 'fluency', level: ['critical', 'minor'], type: ['source', 'target'] },
+        { issue: "custom", level: ["critical", "minor"], type: ["source", "target"] },
+        { issue: "fluency", level: ["critical", "minor"], type: ["source", "target"] },
       ], 
       command: "", 
       rowCount: 2, 
@@ -75,12 +75,12 @@ describe('tests getProject method', () => {
     jest.spyOn(IssueService.prototype, "getSegmentIssuesBySegmentId").mockResolvedValueOnce({ 
       rows: [
         {
-          type: 'source',
-          test: 'test',
+          type: "source",
+          test: "test",
         },
         {
-          type: 'target',
-          test: 'test',
+          type: "target",
+          test: "test",
         },
       ], 
       command: "", 
@@ -94,7 +94,7 @@ describe('tests getProject method', () => {
       rowCount: 1, 
       oid: 0, 
       fields: [] 
-    })
+    });
 
     await bottle.container.ProjectController.getProject(req, res);
 
@@ -106,39 +106,39 @@ describe('tests getProject method', () => {
         custom: [0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 2],
         fluency: [0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 2],
       },
-      users: [{ testUser: 'test' }],
+      users: [{ testUser: "test" }],
       segments: [{
         id: 1,
         sourceErrors: [
           {
-            type: 'source',
-            test: 'test',
+            type: "source",
+            test: "test",
           },
         ],
         targetErrors: [
           {
-            type: 'target',
-            test: 'test',
+            type: "target",
+            test: "test",
           },
         ],
       }],
       issues: {
         custom:
         {
-          issue: 'custom',
+          issue: "custom",
           parent: null,
-          name: 'Custom',
-          description: '',
-          notes: '',
-          examples: '',
+          name: "Custom",
+          description: "",
+          notes: "",
+          examples: "",
           children: {
             fluency: {
-              issue: 'fluency',
-              parent: 'custom',
-              name: 'Fluency',
-              description: '',
-              notes: '',
-              examples: '',
+              issue: "fluency",
+              parent: "custom",
+              name: "Fluency",
+              description: "",
+              notes: "",
+              examples: "",
               children: {},
             },
           },
@@ -147,14 +147,14 @@ describe('tests getProject method', () => {
     });
   });
 
-  it('should fail to get project not assigned to user', async () => {
+  it("should fail to get project not assigned to user", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        name: 'test',
+        name: "test",
       },
-      role: 'user',
+      role: "user",
       params: {
         projectId: "2",
       },
@@ -175,7 +175,7 @@ describe('tests getProject method', () => {
       fields: [] 
     });
     jest.spyOn(ProjectService.prototype, "getProjectUsersById").mockResolvedValueOnce({ 
-      rows: [{ testUser: 'test' }], 
+      rows: [{ testUser: "test" }], 
       command: "", 
       rowCount: 1, 
       oid: 0, 
@@ -184,10 +184,10 @@ describe('tests getProject method', () => {
     jest.spyOn(IssueService.prototype, "getProjectIssuesById").mockResolvedValueOnce({ 
       rows: [
         {
-          issue: 'fluency', parent: 'custom', name: 'Fluency', description: '', notes: '', examples: '',
+          issue: "fluency", parent: "custom", name: "Fluency", description: "", notes: "", examples: "",
         },
         {
-          issue: 'custom', parent: null, name: 'Custom', description: '', notes: '', examples: '',
+          issue: "custom", parent: null, name: "Custom", description: "", notes: "", examples: "",
         }
       ], 
       command: "", 
@@ -197,8 +197,8 @@ describe('tests getProject method', () => {
     });
     jest.spyOn(IssueService.prototype, "getProjectReportById").mockResolvedValueOnce({ 
       rows: [
-        { issue: 'custom', level: ['critical', 'minor'], type: ['source', 'target'] },
-        { issue: 'fluency', level: ['critical', 'minor'], type: ['source', 'target'] },
+        { issue: "custom", level: ["critical", "minor"], type: ["source", "target"] },
+        { issue: "fluency", level: ["critical", "minor"], type: ["source", "target"] },
       ], 
       command: "", 
       rowCount: 2, 
@@ -208,12 +208,12 @@ describe('tests getProject method', () => {
     jest.spyOn(IssueService.prototype, "getSegmentIssuesBySegmentId").mockResolvedValueOnce({ 
       rows: [
         {
-          type: 'source',
-          test: 'test',
+          type: "source",
+          test: "test",
         },
         {
-          type: 'target',
-          test: 'test',
+          type: "target",
+          test: "test",
         },
       ], 
       command: "", 
@@ -227,7 +227,7 @@ describe('tests getProject method', () => {
       rowCount: 1, 
       oid: 0, 
       fields: [] 
-    })
+    });
 
     await bottle.container.ProjectController.getProject(req, res);
 
@@ -236,18 +236,18 @@ describe('tests getProject method', () => {
 
     expect(res.json).toHaveBeenCalledTimes(1);
     expect(res.json).toHaveBeenCalledWith({ 
-      message: 'Access Forbidden' 
+      message: "Access Forbidden" 
     });
   });
 
-  it('should successfully get project assigned to user', async () => {
+  it("should successfully get project assigned to user", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
       body: {
-        name: 'test',
+        name: "test",
       },
-      role: 'user',
+      role: "user",
       params: {
         projectId: "1",
       },
@@ -268,7 +268,7 @@ describe('tests getProject method', () => {
       fields: [] 
     });
     jest.spyOn(ProjectService.prototype, "getProjectUsersById").mockResolvedValueOnce({ 
-      rows: [{ testUser: 'test' }], 
+      rows: [{ testUser: "test" }], 
       command: "", 
       rowCount: 1, 
       oid: 0, 
@@ -277,10 +277,10 @@ describe('tests getProject method', () => {
     jest.spyOn(IssueService.prototype, "getProjectIssuesById").mockResolvedValueOnce({ 
       rows: [
         {
-          issue: 'fluency', parent: 'custom', name: 'Fluency', description: '', notes: '', examples: '',
+          issue: "fluency", parent: "custom", name: "Fluency", description: "", notes: "", examples: "",
         },
         {
-          issue: 'custom', parent: null, name: 'Custom', description: '', notes: '', examples: '',
+          issue: "custom", parent: null, name: "Custom", description: "", notes: "", examples: "",
         }
       ], 
       command: "", 
@@ -290,8 +290,8 @@ describe('tests getProject method', () => {
     });
     jest.spyOn(IssueService.prototype, "getProjectReportById").mockResolvedValue({ 
       rows: [
-        { issue: 'custom', level: ['critical', 'minor'], type: ['source', 'target'] },
-        { issue: 'fluency', level: ['critical', 'minor'], type: ['source', 'target'] },
+        { issue: "custom", level: ["critical", "minor"], type: ["source", "target"] },
+        { issue: "fluency", level: ["critical", "minor"], type: ["source", "target"] },
       ], 
       command: "", 
       rowCount: 2, 
@@ -301,12 +301,12 @@ describe('tests getProject method', () => {
     jest.spyOn(IssueService.prototype, "getSegmentIssuesBySegmentId").mockResolvedValueOnce({ 
       rows: [
         {
-          type: 'source',
-          test: 'test',
+          type: "source",
+          test: "test",
         },
         {
-          type: 'target',
-          test: 'test',
+          type: "target",
+          test: "test",
         },
       ], 
       command: "", 
@@ -320,7 +320,7 @@ describe('tests getProject method', () => {
       rowCount: 1, 
       oid: 0, 
       fields: [] 
-    })
+    });
 
     await bottle.container.ProjectController.getProject(req, res);
 
@@ -332,39 +332,39 @@ describe('tests getProject method', () => {
         custom: [0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 2],
         fluency: [0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 2],
       },
-      users: [{ testUser: 'test' }],
+      users: [{ testUser: "test" }],
       segments: [{
         id: 1,
         sourceErrors: [
           {
-            type: 'source',
-            test: 'test',
+            type: "source",
+            test: "test",
           },
         ],
         targetErrors: [
           {
-            type: 'target',
-            test: 'test',
+            type: "target",
+            test: "test",
           },
         ],
       }],
       issues: {
         custom:
         {
-          issue: 'custom',
+          issue: "custom",
           parent: null,
-          name: 'Custom',
-          description: '',
-          notes: '',
-          examples: '',
+          name: "Custom",
+          description: "",
+          notes: "",
+          examples: "",
           children: {
             fluency: {
-              issue: 'fluency',
-              parent: 'custom',
-              name: 'Fluency',
-              description: '',
-              notes: '',
-              examples: '',
+              issue: "fluency",
+              parent: "custom",
+              name: "Fluency",
+              description: "",
+              notes: "",
+              examples: "",
               children: {},
             },
           },

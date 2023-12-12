@@ -35,7 +35,7 @@ class TokenService {
     values: string[], 
     dbClient: DBClient = this.dbClientPool.connectionPool
   ) {
-    let filters = '';
+    let filters = "";
 
     for (let i = 0; i < attributes.length; ++i) {
       if (i > 0) {

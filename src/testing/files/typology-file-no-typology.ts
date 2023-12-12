@@ -303,4 +303,4 @@ export default {
 </errorType> 
 `
   }
-}
+};
