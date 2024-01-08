@@ -6,6 +6,7 @@ class TokenService {
     private readonly dbClientPool: DBClientPool
   ) {}
 
+  // Transferred
   create(
     userId: any, 
     token: string, 
@@ -19,6 +20,7 @@ class TokenService {
     return dbClient.query(query, [userId, token]);
   }
 
+  // Transferred
   deleteToken(
     token: any, 
     dbClient: DBClient = this.dbClientPool.connectionPool
@@ -30,6 +32,7 @@ class TokenService {
     return dbClient.query(query, [token]);
   }
 
+  // Transferred
   findTokens(
     attributes: string | any[], 
     values: string[], 

@@ -6,6 +6,7 @@ class ProjectService {
     private readonly dbClientPool: DBClientPool
   ) {}
 
+  // Transferred
   createProject(
     projectName: any, 
     specificationsFileName: string, 
@@ -28,6 +29,7 @@ class ProjectService {
     return dbClient.query(createProjectQuery, [projectName, specificationsFileName, specifications, metricFileName, bitextFileName, sourceWordCount, targetWordCount]);
   }
 
+  // Transferred
   mapUsertoProject(
     projectId: string, 
     userId: string, 
@@ -43,6 +45,7 @@ class ProjectService {
     return dbClient.query(mapUserToProjectQuery, [projectId, userId]);
   }
 
+  // Transferred
   getAllProjects(dbClient: DBClient = this.dbClientPool.connectionPool) {
     const query = `
       SELECT * FROM projects ORDER BY project_id ASC;
@@ -51,6 +54,7 @@ class ProjectService {
     return dbClient.query(query);
   }
 
+  // Transferred
   getProjectsByUserId(
     userId: string, 
     dbClient: DBClient = this.dbClientPool.connectionPool
@@ -72,6 +76,7 @@ class ProjectService {
     return dbClient.query(query, [userId]);
   }
 
+  // Transferred
   deleteProjectById(
     projectId: string, 
     dbClient: DBClient = this.dbClientPool.connectionPool
@@ -85,6 +90,7 @@ class ProjectService {
     return dbClient.query(query, [projectId]);
   }
 
+  // Transferred
   deleteUserFromAllProjects(
     userId: string, 
     dbClient: DBClient = this.dbClientPool.connectionPool
@@ -98,6 +104,7 @@ class ProjectService {
     return dbClient.query(query, [userId]);
   }
 
+  // Transferred
   getProjectById(
     projectId: string, 
     dbClient: DBClient = this.dbClientPool.connectionPool
@@ -112,6 +119,7 @@ class ProjectService {
     return dbClient.query(query, [projectId]);
   }
 
+  // Transferred
   getProjectUsersById(
     projectId: any, 
     dbClient: DBClient = this.dbClientPool.connectionPool
@@ -128,6 +136,7 @@ class ProjectService {
     return dbClient.query(query, [projectId]);
   }
 
+  // Transferred
   deleteUserFromProject(
     userId: string, 
     projectId: string, 
@@ -142,6 +151,7 @@ class ProjectService {
     return dbClient.query(query, [userId, projectId]);
   }
 
+  // Transferred
   setProjectAttributes(
     attributes: string | any[], 
     values: any[], 

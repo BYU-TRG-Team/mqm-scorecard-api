@@ -6,6 +6,7 @@ class IssueService {
     private readonly dbClientPool: DBClientPool
   ) {}
 
+  // Transferred
   getIssueById(
     id: any, 
     dbClient: DBClient = this.dbClientPool.connectionPool
@@ -20,6 +21,7 @@ class IssueService {
     return dbClient.query(getIssueQuery, [id]);
   }
 
+  // Transferred
   createIssue(
     id: any,
     parent: any, 
@@ -39,6 +41,7 @@ class IssueService {
     return dbClient.query(query, [id, parent, name, description, notes, examples]);
   }
 
+  // Transferred
   createProjectIssue(
     projectId: any, 
     issue: any, 
@@ -55,6 +58,7 @@ class IssueService {
     return dbClient.query(createProjectIssueQuery, [projectId, issue, display]);
   }
 
+  // Transferred
   getProjectIssuesById(
     projectId: string, 
     dbClient: DBClient = this.dbClientPool.connectionPool
@@ -74,6 +78,7 @@ class IssueService {
     return dbClient.query(query, [projectId]);
   }
 
+  // Transferred
   deleteIssues(
     attributes: string | any[], 
     values: never[], 
@@ -97,6 +102,7 @@ class IssueService {
     return dbClient.query(query, values);
   }
 
+  // Transferred
   getAllIssues(dbClient: DBClient = this.dbClientPool.connectionPool) {
     const query = `
       SELECT 
@@ -112,6 +118,7 @@ class IssueService {
     return dbClient.query(query);
   }
 
+  // Transferred
   addSegmentIssue(
     segmentId: string, 
     note: any, 
@@ -133,6 +140,8 @@ class IssueService {
     return dbClient.query(query, [segmentId, note, highlighting, issue, level, type, highlightStartindex, highlightEndIndex]);
   }
 
+  // Transferred
+  // We need to be careful here because issue.name is extracted here
   getSegmentIssuesBySegmentId(
     segmentId: any, 
     dbClient: DBClient = this.dbClientPool.connectionPool
@@ -154,6 +163,8 @@ class IssueService {
     return dbClient.query(query, [segmentId]);
   }
 
+  // Transferred
+  // We need to be careful here because issue.name is extracted here
   getSegmentIssuesByProjectId(
     projectId: string, 
     dbClient: DBClient = this.dbClientPool.connectionPool
@@ -193,6 +204,7 @@ class IssueService {
     return dbClient.query(query, [projectId]);
   }
 
+  // Transferred
   deleteSegmentIssueById(
     issueId: string, 
     dbClient: DBClient = this.dbClientPool.connectionPool
@@ -204,6 +216,7 @@ class IssueService {
     return dbClient.query(query, [issueId]);
   }
 
+  // Transferred
   getSegmentIssueById(
     issueId: string, 
     dbClient: DBClient = this.dbClientPool.connectionPool
@@ -215,6 +228,7 @@ class IssueService {
     return dbClient.query(query, [issueId]);
   }
 
+  // Transferred
   updateSegmentIssue(
     segmentIssue: any, 
     dbClient: DBClient = this.dbClientPool.connectionPool
@@ -238,6 +252,7 @@ class IssueService {
     ]);
   }
 
+  // Transferred
   getProjectReportById(
     projectId: any, 
     dbClient: DBClient = this.dbClientPool.connectionPool

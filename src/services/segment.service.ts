@@ -6,6 +6,7 @@ class SegmentService {
     private readonly dbClientPool: DBClientPool
   ) {}
 
+  // Transferred
   createSegments(
     segments: any[], 
     projectId: any, 
@@ -35,6 +36,7 @@ class SegmentService {
     return dbClient.query(query, values);
   }
 
+  // Transferred
   deleteSegments(
     attributes: string | any[], 
     values: any[], 
@@ -58,6 +60,7 @@ class SegmentService {
     return dbClient.query(query, values);
   }
 
+  // Transferred
   getSegmentsByProjectId(
     projectId: string, 
     dbClient: DBClient = this.dbClientPool.connectionPool
@@ -69,6 +72,7 @@ class SegmentService {
     return dbClient.query(query, [projectId]);
   }
 
+  // Transferred
   getSegmentById(
     segmentId: string, 
     dbClient: DBClient = this.dbClientPool.connectionPool
@@ -80,6 +84,7 @@ class SegmentService {
     return dbClient.query(query, [segmentId]);
   }
 
+  // Not needed. Segment has project id
   getSegmentByIssueId(
     errorId: string, 
     dbClient: DBClient = this.dbClientPool.connectionPool
@@ -91,6 +96,7 @@ class SegmentService {
     return dbClient.query(query, [errorId]);
   }
 
+  // Transferred
   setSegmentAttributes(
     attributes: string | any[], 
     values: any[], 

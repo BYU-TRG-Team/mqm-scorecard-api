@@ -6,6 +6,7 @@ class UserService {
     private readonly dbClientPool: DBClientPool
   ) {}
 
+  // Transferred
   create(
     username: any, 
     email: any, 
@@ -22,6 +23,7 @@ class UserService {
     return dbClient.query(query, [username, email, password, roleId, name]);
   }
 
+  // Transferred
   setAttributes(
     attributes: string | any[], 
     values: any[], 
@@ -47,6 +49,7 @@ class UserService {
     return dbClient.query(query, values);
   }
 
+  // Transferred
   findUsers(
     attributes: string | any[], 
     values: any[], 
@@ -70,6 +73,7 @@ class UserService {
     return dbClient.query(query, values);
   }
 
+  // Transferred
   getAllUsers(dbClient: DBClient = this.dbClientPool.connectionPool) {
     const query = `
       SELECT * FROM users ORDER BY user_id ASC;
@@ -78,6 +82,7 @@ class UserService {
     return dbClient.query(query);
   }
 
+  // Transferred
   deleteUser(userId: string, dbClient: DBClient = this.dbClientPool.connectionPool) {
     const query = `
       DELETE FROM users WHERE user_id=$1;
