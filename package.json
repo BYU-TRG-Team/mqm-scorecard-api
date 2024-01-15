@@ -1,16 +1,16 @@
 {
   "name": "mqm-scorecard-api",
-  "main": "dist/src/index.js",
+  "main": "dist/index.js",
   "version": "0.1.0",
   "scripts": {
-    "start": "node dist/src/index.js",
+    "start": "node dist/index.js",
     "build": "tsc",
     "test": "jest",
-    "db:configure": "node dist/src/db/configure.js",
-    "db:set-user-role": "node dist/src/db/set-user-role.js",
+    "db:set-user-role": "node dist/db/set-user-role.js",
     "prepare": "husky install",
     "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix"
+    "lint:fix": "eslint . --ext .ts --fix",
+    "migrate": "ts-node node_modules/.bin/node-pg-migrate -j ts -m db_migrations"
   },
   "repository": {
     "type": "git",
@@ -34,10 +34,12 @@
     "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^3.1.2",
     "lodash.clonedeep": "^4.5.0",
+    "node-pg-migrate": "^6.2.2",
     "nodemailer": "^6.7.0",
     "nodemailer-sendgrid-transport": "^0.2.0",
     "nodemon": "^2.0.7",
     "pg": "^8.11.3",
+    "ts-node": "^10.9.2",
     "winston": "^3.5.0",
     "xml2js": "^0.4.23",
     "xmlbuilder": "^11.0.1"
