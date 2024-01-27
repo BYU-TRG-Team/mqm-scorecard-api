@@ -5,16 +5,19 @@
     "resolveJsonModule": true,
     "sourceMap": true, 
     "outDir": "./dist", 
-    "strict": true, 
+    "strict": true,
     "noUnusedLocals": false,
     "moduleResolution": "node",
     "baseUrl": ".",
-    "rootDir": ".",
+    "rootDir": "src/",
     "esModuleInterop": true,
     "declaration": true,  
   },
   "include": [
     "src/**/*",
-    "@types/**/*"
+    "@types/**/*",
+  ],
+  "exclude": [
+    "**/__tests__/**/*"
   ]
 }
