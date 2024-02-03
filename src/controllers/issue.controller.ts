@@ -147,7 +147,6 @@ class IssueController {
 
   /*
   * GET /api/issues
-  * @typologyFile
   */
 
   async getTypology(_req: Request, res: Response) {
