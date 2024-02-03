@@ -226,3 +226,303 @@ The JSON output for a project is structured as defined below:
 }
 ```
 
+## Endpoints
+Parameters are required unless otherwise specified.
+
+<br />
+
+### Typology
+
+---
+
+<details>
+  <summary>
+    Upload Typology
+  </summary>
+
+  #### URL
+  /api/issues
+
+  #### HTTP METHOD
+  POST
+
+  #### Allowed Roles
+  Admin
+
+  #### Params
+  @typologyFile (FormData)
+</details>
+
+---
+
+<details>
+  <summary>
+    Download Typology
+  </summary>
+
+  #### URL
+  /api/issues
+
+  #### HTTP METHOD
+  GET
+
+  #### Allowed Roles
+  Admin
+  <br />
+  Staff
+</details>
+
+--- 
+
+<br />
+
+### Project
+
+--- 
+
+<details>
+  <summary>
+    Create Project
+  </summary>
+
+  #### URL
+  /api/project
+
+  #### HTTP METHOD
+  POST
+
+  #### Allowed Roles
+  Admin
+  <br />
+  Staff
+
+  #### Params
+  @name (string)
+  <br />
+  @bitextFile (FormData)
+  <br />
+  @metricFile (FormData)
+  <br />
+  @specificationsFile (FormData) (optional)
+</details>
+
+---
+
+<details>
+  <summary>
+    Get Project Report
+  </summary>
+
+  #### URL
+  /api/project/:projectId/report
+
+  #### HTTP METHOD
+  GET
+
+  #### Note
+  See the [Project JSON Output](#project-json-output) for more details on format.
+</details>
+
+---
+
+<details>
+  <summary>
+    Get Projects
+  </summary>
+
+  #### URL
+  /api/projects
+
+  #### HTTP METHOD
+  GET
+</details>
+
+---
+
+<details>
+  <summary>
+    Delete Project
+  </summary>
+
+  #### URL
+  /api/project/:projectId
+
+  #### HTTP METHOD
+  DELETE
+
+  #### Allowed Roles
+  Admin
+  <br />
+  Staff
+</details>
+
+---
+
+<details>
+  <summary>
+    Get Project
+  </summary>
+
+  #### URL
+  /api/project/:projectId
+
+  #### HTTP METHOD
+  GET
+</details>
+
+---
+
+<details>
+  <summary>
+    Delete Project User
+  </summary>
+
+  #### URL
+  /api/project/:projectId/user/:userId
+
+  #### HTTP METHOD
+  DELETE
+
+  #### Allowed Roles
+  Admin
+  <br />
+  Staff
+</details>
+
+---
+
+<details>
+  <summary>
+    Delete User Projects
+  </summary>
+
+  #### URL
+  /api/user/:userId/projects
+
+  #### HTTP METHOD
+  DELETE
+
+  #### Allowed Roles
+  Admin
+</details>
+
+---
+
+<details>
+  <summary>
+    Create Project User
+  </summary>
+
+  #### URL
+  /api/project/:projectId/user
+
+  #### HTTP METHOD
+  POST
+
+  #### Allowed Roles
+  Admin
+  <br />
+  Staff
+
+  #### Params
+  @username (string)
+</details>
+
+---
+
+<details>
+  <summary>
+    Update Project
+  </summary>
+
+  #### URL
+  /api/project/:projectId
+
+  #### HTTP METHOD
+  PUT
+
+  #### Params
+  @segmentNum (integer) (optional)
+  <br/>
+  @finished (boolean) (optional)
+  <br/>
+  @name (string) (optional)
+  <br/>
+  @bitextFile (FormData) (optional)
+  <br/>
+  @metricFile (FormData) (optional)
+  <br/>
+  @specificationsFile (FormData) (optional)
+</details>
+
+---
+
+<br />
+
+### Segment
+
+---
+
+<details>
+  <summary>
+    Create Segment Error
+  </summary>
+
+  #### URL
+  /api/segment/:segmentId/error
+
+  #### HTTP METHOD
+  POST
+
+  #### Params
+  @note (string)
+  <br/>
+  @highlighting (string)
+  <br/>
+  @issue (string)
+  <br/>
+  @level (string)
+  <br/>
+  @type (string)
+  <br/>
+  @highlightStartIndex (integer)
+  <br/>
+  @highlightEndIndex (integer)
+</details>
+
+---
+
+<details>
+  <summary>
+    Delete Segment Error
+  </summary>
+
+  #### URL
+  /api/segment/error/:issueId
+
+  #### HTTP METHOD
+  DELETE
+</details>
+
+---
+
+<details>
+  <summary>
+    Update Segment Error
+  </summary>
+
+  #### URL
+  /api/segment/error/:issueId
+
+  #### HTTP METHOD
+  PATCH
+
+  #### Params
+  @note (string) (optional)
+  <br/>
+  @issue (string) (optional)
+  <br/>
+  @level (string) (optional)
+</details>
+
+---
