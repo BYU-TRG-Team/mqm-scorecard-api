@@ -14,6 +14,7 @@ import validSpecificationsFile from "../../../testing/files/valid-specifications
 import emptyFile from "../../../testing/files/empty-file";
 import SegmentService from "../../../services/segment.service";
 import ProjectService from "../../../services/project.service";
+import ErrorService from "../../../services/error.service";
 import DBClientPool from "../../../db-client-pool";
 import { setTestEnvironmentVars } from "../helpers";
 
@@ -60,6 +61,13 @@ describe("tests updateProject method", () => {
       fields: [] 
     });
     jest.spyOn(ProjectService.prototype, "getProjectsByUserId").mockResolvedValueOnce({ 
+      rows: [], 
+      command: "", 
+      rowCount: 0, 
+      oid: 0, 
+      fields: [] 
+    });
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
       rows: [], 
       command: "", 
       rowCount: 0, 
@@ -113,6 +121,13 @@ describe("tests updateProject method", () => {
       fields: [] 
     });
     jest.spyOn(SegmentService.prototype, "getSegmentsByProjectId").mockResolvedValueOnce({ 
+      rows: [], 
+      command: "", 
+      rowCount: 0, 
+      oid: 0, 
+      fields: [] 
+    });
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
       rows: [], 
       command: "", 
       rowCount: 0, 
@@ -173,6 +188,13 @@ describe("tests updateProject method", () => {
       oid: 0, 
       fields: [] 
     });
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
+      rows: [], 
+      command: "", 
+      rowCount: 0, 
+      oid: 0, 
+      fields: [] 
+    });
 
     await bottle.container.ProjectController.updateProject(req, res);
 
@@ -227,6 +249,13 @@ describe("tests updateProject method", () => {
       oid: 0, 
       fields: [] 
     });
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
+      rows: [], 
+      command: "", 
+      rowCount: 0, 
+      oid: 0, 
+      fields: [] 
+    });
 
     await bottle.container.ProjectController.updateProject(req, res);
 
@@ -275,6 +304,13 @@ describe("tests updateProject method", () => {
       fields: [] 
     });
     jest.spyOn(SegmentService.prototype, "getSegmentsByProjectId").mockResolvedValueOnce({ 
+      rows: [], 
+      command: "", 
+      rowCount: 0, 
+      oid: 0, 
+      fields: [] 
+    });
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
       rows: [], 
       command: "", 
       rowCount: 0, 
@@ -336,6 +372,13 @@ describe("tests updateProject method", () => {
       oid: 0, 
       fields: [] 
     });
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
+      rows: [], 
+      command: "", 
+      rowCount: 0, 
+      oid: 0, 
+      fields: [] 
+    });
 
     await bottle.container.ProjectController.updateProject(req, res);
 
@@ -390,6 +433,13 @@ describe("tests updateProject method", () => {
       oid: 0, 
       fields: [] 
     });
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
+      rows: [], 
+      command: "", 
+      rowCount: 0, 
+      oid: 0, 
+      fields: [] 
+    });
 
     await bottle.container.ProjectController.updateProject(req, res);
 
@@ -438,6 +488,13 @@ describe("tests updateProject method", () => {
       fields: [] 
     });
     jest.spyOn(SegmentService.prototype, "getSegmentsByProjectId").mockResolvedValueOnce({ 
+      rows: [], 
+      command: "", 
+      rowCount: 0, 
+      oid: 0, 
+      fields: [] 
+    });
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
       rows: [], 
       command: "", 
       rowCount: 0, 
@@ -658,6 +715,13 @@ describe("tests updateProject method", () => {
       oid: 0, 
       fields: [] 
     });
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
+      rows: [], 
+      command: "", 
+      rowCount: 0, 
+      oid: 0, 
+      fields: [] 
+    });
 
     await bottle.container.ProjectController.updateProject(req, res);
 
@@ -692,7 +756,7 @@ describe("tests updateProject method", () => {
     });
 
     jest.spyOn(ProjectController.prototype, "upsertProject");
-    jest.spyOn(ProjectService.prototype, "getProjectsByUserId").mockResolvedValueOnce({ 
+    jest.spyOn(ProjectService.prototype, "getProjectsByUserId").mockResolvedValueOnce({
       rows: [], 
       command: "", 
       rowCount: 0, 
@@ -706,7 +770,7 @@ describe("tests updateProject method", () => {
       oid: 0, 
       fields: [] 
     });
-    jest.spyOn(IssueService.prototype, "getSegmentIssuesBySegmentId").mockResolvedValueOnce({
+    jest.spyOn(ErrorService.prototype, "getErrorsBySegmentId").mockResolvedValueOnce({
       rows: [{}], 
       command: "", 
       rowCount: 1, 
@@ -720,6 +784,13 @@ describe("tests updateProject method", () => {
       oid: 0, 
       fields: [] 
     });
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
+      rows: [{}], 
+      command: "", 
+      rowCount: 1, 
+      oid: 0, 
+      fields: [] 
+    });
 
     await bottle.container.ProjectController.updateProject(req, res);
 
@@ -728,7 +799,7 @@ describe("tests updateProject method", () => {
 
     expect(res.json).toHaveBeenCalledTimes(1);
     expect(res.json).toHaveBeenCalledWith({ 
-      message: "Changing the bi-text or metric files is not possible until all reported issues are removed." 
+      message: "Changing the bi-text or metric files is not possible until all reported errors are removed." 
     });
 
     expect(res.status).toHaveBeenCalledTimes(1);

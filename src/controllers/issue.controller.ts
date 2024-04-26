@@ -28,7 +28,7 @@ class IssueController {
   async updateTypology(req: Request, res: Response) {
     let dbTXNClient: PoolClient;
     let parsedTypologyFile;
-    const newIssueTypes = new Array<any>();
+    const newIssues = [];
 
     if (!req.files || !req.files.typologyFile || Array.isArray(req.files.typologyFile)) {
       return res.status(400).json({ 
@@ -39,7 +39,7 @@ class IssueController {
     try {
       const projectResponse = await this.projectService.getAllProjects();
 
-      if (projectResponse.rows.length !== 0) {
+      if (projectResponse.rows.length) {
         return res.status(400).json({ 
           message: "All projects must be deleted before importing a new typology" 
         });
@@ -65,7 +65,6 @@ class IssueController {
       }
     } catch (err) {
       const errMessage = isError(err) ? err.message : "";
-      
       return res.status(400).json({ 
         message: `Problem parsing typology file: ${errMessage}` 
       });
@@ -93,7 +92,8 @@ class IssueController {
       ] = this.fileParser.parseTypologyFile(parsedTypologyFile.typology);
 
       if (typologyFileResponseErr) {
-        return res.status(400).json({ 
+        await this.dbClientPool.rollbackTransaction(dbTXNClient);
+        return res.status(400).json({
           message: `Problem parsing typology file: ${typologyFileResponseErr}`
         });
       }
@@ -102,32 +102,20 @@ class IssueController {
       await this.issueService.deleteIssues([], [], dbTXNClient);
 
       for (let i = 0; i < typologyFileResponse.length; ++i) {
-        const selectedIssueType = typologyFileResponse[i];
-        const {
-          id, parent, name, description, notes, examples,
-        } = selectedIssueType;
-
-        newIssueTypes.push(name);
+        const newIssue = typologyFileResponse[i];
+        newIssues.push(newIssue.name);
         await this.issueService.createIssue(
-          id, 
-          parent, 
-          name, 
-          description, 
-          notes, 
-          examples, 
+          newIssue.id, 
+          newIssue.parent, 
+          newIssue.name, 
+          newIssue.description, 
+          newIssue.notes, 
+          newIssue.examples, 
           dbTXNClient
         );
       }
 
-      let message = "The following issue types have been created: ";
-      newIssueTypes.forEach((issueType, index) => {
-        if (index > 0) {
-          message += ", ";
-        }
-
-        message += `${issueType}`;
-      });
-
+      const message = "The following issues have been created: " + newIssues.join(", ");
       await this.dbClientPool.commitTransaction(dbTXNClient);
       return res.json({ message });
     } catch (err) {

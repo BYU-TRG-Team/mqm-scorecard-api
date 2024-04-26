@@ -2,6 +2,7 @@ import { getMockReq, getMockRes } from "@jest-mock/express";
 import { constructBottle } from "../../../bottle";
 import ProjectService from "../../../services/project.service";
 import IssueService from "../../../services/issue.service";
+import ErrorService from "../../../services/error.service";
 import SegmentService from "../../../services/segment.service";
 import { setTestEnvironmentVars } from "../helpers";
 
@@ -62,17 +63,19 @@ describe("tests getProject method", () => {
       oid: 0, 
       fields: [] 
     });
-    jest.spyOn(IssueService.prototype, "getProjectReportById").mockResolvedValue({ 
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValue({ 
       rows: [
-        { issue: "custom", level: ["critical", "minor"], type: ["source", "target"] },
-        { issue: "fluency", level: ["critical", "minor"], type: ["source", "target"] },
+        { issue: "custom", level: "critical", type: "source" },
+        { issue: "custom", level: "minor", type: "target" },
+        { issue: "fluency", level: "critical", type: "source" },
+        { issue: "fluency", level: "minor", type: "target" },
       ], 
       command: "", 
-      rowCount: 2, 
+      rowCount: 4, 
       oid: 0, 
       fields: [] 
     });
-    jest.spyOn(IssueService.prototype, "getSegmentIssuesBySegmentId").mockResolvedValueOnce({ 
+    jest.spyOn(ErrorService.prototype, "getErrorsBySegmentId").mockResolvedValueOnce({ 
       rows: [
         {
           type: "source",
@@ -195,17 +198,19 @@ describe("tests getProject method", () => {
       oid: 0, 
       fields: [] 
     });
-    jest.spyOn(IssueService.prototype, "getProjectReportById").mockResolvedValueOnce({ 
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
       rows: [
-        { issue: "custom", level: ["critical", "minor"], type: ["source", "target"] },
-        { issue: "fluency", level: ["critical", "minor"], type: ["source", "target"] },
+        { issue: "custom", level: "critical", type: "source" },
+        { issue: "custom", level: "minor", type: "target" },
+        { issue: "fluency", level: "critical", type: "source" },
+        { issue: "fluency", level: "minor", type: "target" },
       ], 
       command: "", 
-      rowCount: 2, 
+      rowCount: 4, 
       oid: 0, 
       fields: [] 
     });
-    jest.spyOn(IssueService.prototype, "getSegmentIssuesBySegmentId").mockResolvedValueOnce({ 
+    jest.spyOn(ErrorService.prototype, "getErrorsBySegmentId").mockResolvedValueOnce({ 
       rows: [
         {
           type: "source",
@@ -288,17 +293,19 @@ describe("tests getProject method", () => {
       oid: 0, 
       fields: [] 
     });
-    jest.spyOn(IssueService.prototype, "getProjectReportById").mockResolvedValue({ 
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValue({ 
       rows: [
-        { issue: "custom", level: ["critical", "minor"], type: ["source", "target"] },
-        { issue: "fluency", level: ["critical", "minor"], type: ["source", "target"] },
+        { issue: "custom", level: "critical", type: "source" },
+        { issue: "custom", level: "minor", type: "target" },
+        { issue: "fluency", level: "critical", type: "source" },
+        { issue: "fluency", level: "minor", type: "target" },
       ], 
       command: "", 
-      rowCount: 2, 
+      rowCount: 4, 
       oid: 0, 
       fields: [] 
     });
-    jest.spyOn(IssueService.prototype, "getSegmentIssuesBySegmentId").mockResolvedValueOnce({ 
+    jest.spyOn(ErrorService.prototype, "getErrorsBySegmentId").mockResolvedValueOnce({ 
       rows: [
         {
           type: "source",

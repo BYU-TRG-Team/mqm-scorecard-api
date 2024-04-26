@@ -6,6 +6,7 @@ import TokenHandler from "./support/tokenhandler.support";
 import IssueParser from "./support/issueparser.support";
 import UserService from "./services/user.service";
 import IssueService from "./services/issue.service";
+import ErrorService from "./services/error.service";
 import ProjectService from "./services/project.service";
 import SegmentService from "./services/segment.service";
 import TokenService from "./services/token.service";
@@ -53,6 +54,7 @@ export const constructBottle = () => {
   bottle.service("IssueService", IssueService, "DBClientPool");
   bottle.service("ProjectService", ProjectService, "DBClientPool");
   bottle.service("SegmentService", SegmentService, "DBClientPool");
+  bottle.service("ErrorService", ErrorService, "DBClientPool");
   bottle.factory("DBClientPool", (container) => {
     const pool = new Pool({
       connectionString: container.CleanEnv.DATABASE_URL,
@@ -110,6 +112,7 @@ export const constructBottle = () => {
     "ProjectService",
     "IssueService",
     "SegmentService",
+    "ErrorService",
     "IssueParser",
     "Logger"
   );
@@ -118,7 +121,7 @@ export const constructBottle = () => {
     SegmentController,
     "SegmentService",
     "ProjectService",
-    "IssueService",
+    "ErrorService",
     "Logger"
   );
   bottle.service(
