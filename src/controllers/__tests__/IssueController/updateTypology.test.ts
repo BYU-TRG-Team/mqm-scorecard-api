@@ -170,7 +170,7 @@ describe("tests updateTypology method", () => {
     });
   });
 
-  it("should successfully parse typology file and start/end transaction that creates each error", async () => {
+  it("should successfully parse typology file and start/end transaction that creates issues", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
@@ -201,22 +201,22 @@ describe("tests updateTypology method", () => {
 
     expect(res.json).toHaveBeenCalledTimes(1);
     expect(res.json).toHaveBeenCalledWith({ 
-      message: "The following issue types have been created: Terminology, inconsistent with terminology resource, organization terminology, third-party terminology, inconsistent use of terminology, multiple terms in source, multiple terms in translation, wrong term, Accuracy, mistranslation, mistranslation of technical relationship, ambiguous translation, false friend, unit conversion, number, date/time, entity, overly literal, overtranslation, undertranslation, addition, omission, omitted variable, do not translate, untranslated, untranslated graphic, Linguistic Conventions, grammar, word form, part of speech, tense/mood/aspect, agreement, word order, function words, typography, punctuation, unpaired quote marks or brackets, whitespace, orthography, spelling, diacritics, transliteration, capitalization, compounding, title style, corpus conformance, pattern problem, duplication" 
+      message: "The following issues have been created: Terminology, inconsistent with terminology resource, organization terminology, third-party terminology, inconsistent use of terminology, multiple terms in source, multiple terms in translation, wrong term, Accuracy, mistranslation, mistranslation of technical relationship, ambiguous translation, false friend, unit conversion, number, date/time, entity, overly literal, overtranslation, undertranslation, addition, omission, omitted variable, do not translate, untranslated, untranslated graphic, Linguistic Conventions, grammar, word form, part of speech, tense/mood/aspect, agreement, word order, function words, typography, punctuation, unpaired quote marks or brackets, whitespace, orthography, spelling, diacritics, transliteration, capitalization, compounding, title style, corpus conformance, pattern problem, duplication" 
     });
 
     expect(IssueService.prototype.deleteIssues).toHaveBeenCalledTimes(1);
       
     expect(IssueService.prototype.createIssue).toHaveBeenCalledTimes(validTypologyFileParsed.length);
     (IssueService.prototype.createIssue as jest.Mock).mock.calls.forEach((mockCall) => {
-      const mockedError = validTypologyFileParsed.filter((error) => error.id === mockCall[0])[0];
+      const mockedIssue = validTypologyFileParsed.filter((issue) => issue.id === mockCall[0])[0];
 
-      expect(mockedError).not.toStrictEqual(undefined);
-      expect(mockedError.id).toStrictEqual(mockCall[0]);
-      expect(mockedError.parent).toStrictEqual(mockCall[1]);
-      expect(mockedError.name).toStrictEqual(mockCall[2]);
-      expect(mockedError.description).toStrictEqual(mockCall[3]);
-      expect(mockedError.notes).toStrictEqual(mockCall[4]);
-      expect(mockedError.examples).toStrictEqual(mockCall[5]);
+      expect(mockedIssue).not.toStrictEqual(undefined);
+      expect(mockedIssue.id).toStrictEqual(mockCall[0]);
+      expect(mockedIssue.parent).toStrictEqual(mockCall[1]);
+      expect(mockedIssue.name).toStrictEqual(mockCall[2]);
+      expect(mockedIssue.description).toStrictEqual(mockCall[3]);
+      expect(mockedIssue.notes).toStrictEqual(mockCall[4]);
+      expect(mockedIssue.examples).toStrictEqual(mockCall[5]);
       expect(mockCall[6]).not.toStrictEqual(undefined);
     });
   });

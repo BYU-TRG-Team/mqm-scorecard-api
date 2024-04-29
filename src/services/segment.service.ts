@@ -80,12 +80,12 @@ class SegmentService {
     return dbClient.query(query, [segmentId]);
   }
 
-  getSegmentByIssueId(
+  getSegmentByErrorId(
     errorId: string, 
     dbClient: DBClient = this.dbClientPool.connectionPool
   ) {
     const query = `
-      SELECT segments.project_id as project_id from segments join segment_issues ON segments.id = segment_issues.segment_id WHERE segment_issues.id=$1
+      SELECT segments.project_id as project_id from segments join errors ON segments.id = errors.segment_id WHERE errors.id=$1
     `;
 
     return dbClient.query(query, [errorId]);

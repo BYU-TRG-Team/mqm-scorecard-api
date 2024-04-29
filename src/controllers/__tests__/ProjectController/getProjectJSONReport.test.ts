@@ -4,6 +4,7 @@ import ProjectService from "../../../services/project.service";
 import IssueService from "../../../services/issue.service";
 import SegmentService from "../../../services/segment.service";
 import { setTestEnvironmentVars } from "../helpers";
+import ErrorService from "../../../services/error.service";
 
 jest.mock("pg");
 jest.mock("nodemailer");
@@ -73,7 +74,7 @@ describe("tests getProjectJSONReport method", () => {
       oid: 0, 
       fields: [] 
     });
-    jest.spyOn(IssueService.prototype, "getSegmentIssuesByProjectId").mockResolvedValueOnce({ 
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
       rows: [
         {
           segment_id: 1,
@@ -92,14 +93,14 @@ describe("tests getProjectJSONReport method", () => {
       oid: 0, 
       fields: [] 
     });
-    jest.spyOn(IssueService.prototype, "getProjectReportById").mockResolvedValueOnce({ 
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
       rows: [
         {
-          level: ["critical"],
+          level: "critical",
         },
         {
-          level: ["minor"],
-        },
+          level: "minor"
+        }
       ], 
       command: "", 
       rowCount: 2, 
@@ -235,7 +236,7 @@ describe("tests getProjectJSONReport method", () => {
       oid: 0, 
       fields: [] 
     });
-    jest.spyOn(IssueService.prototype, "getSegmentIssuesByProjectId").mockResolvedValueOnce({ 
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
       rows: [
         {
           segment_id: 1,
@@ -254,14 +255,14 @@ describe("tests getProjectJSONReport method", () => {
       oid: 0, 
       fields: [] 
     });
-    jest.spyOn(IssueService.prototype, "getProjectReportById").mockResolvedValueOnce({ 
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
       rows: [
         {
-          level: ["critical"],
+          level: "critical",
         },
         {
-          level: ["minor"],
-        },
+          level: "minor"
+        }
       ], 
       command: "", 
       rowCount: 2, 
@@ -360,7 +361,7 @@ describe("tests getProjectJSONReport method", () => {
       oid: 0, 
       fields: [] 
     });
-    jest.spyOn(IssueService.prototype, "getSegmentIssuesByProjectId").mockResolvedValueOnce({ 
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
       rows: [
         {
           segment_id: 1,
@@ -379,14 +380,14 @@ describe("tests getProjectJSONReport method", () => {
       oid: 0, 
       fields: [] 
     });
-    jest.spyOn(IssueService.prototype, "getProjectReportById").mockResolvedValueOnce({ 
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
       rows: [
         {
-          level: ["critical"],
+          level: "critical",
         },
         {
-          level: ["minor"],
-        },
+          level: "minor"
+        }
       ], 
       command: "", 
       rowCount: 2, 
