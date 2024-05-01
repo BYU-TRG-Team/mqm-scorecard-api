@@ -68,14 +68,9 @@ class AuthController {
       );
 
       const newUser = userResponse.rows[0];
-      const emailVerificationToken = this.tokenHandler.generateEmailVerificationToken();
-      await this.tokenService.create(
-        newUser.user_id, 
-        emailVerificationToken, 
-        dbTXNClient
-      );
 
-      await this.sendVerificationEmail(req, newUser, emailVerificationToken);
+      const emailVerificationToken = await this.createNewVerificationToken(newUser.user_id, dbTXNClient);
+      this.sendVerificationEmail(req, newUser, emailVerificationToken);
       await this.dbClientPool.commitTransaction(dbTXNClient);
       return res.status(204).send();
     } catch (err) {
@@ -128,7 +123,12 @@ class AuthController {
         });
       }
 
+      if (!user.verified) {
+        this.sendUnverifiedMail(user, res, req);
+      }
+
       const { token, cookieOptions } = await this.tokenHandler.generateUserAuthToken(user, req);
+
       res.cookie("scorecard_authtoken", token, cookieOptions);
       return res.json({ token });
     } catch (err) {
@@ -317,6 +317,17 @@ class AuthController {
     }
   }
 
+  async createNewVerificationToken(user_id: number, dbClient: PoolClient) {
+    const emailVerificationToken = this.tokenHandler.generateEmailVerificationToken();
+    await this.tokenService.create(
+      user_id, 
+      emailVerificationToken, 
+      dbClient
+    );
+
+    return emailVerificationToken;
+  }
+
   sendVerificationEmail(req: Request, user: any, token: string) {
     const link = `http://${req.headers.host}/api/auth/verify/${token}`;
     const emailOptions = {
@@ -329,6 +340,30 @@ class AuthController {
     };
 
     return this.smtpService.sendEmail(emailOptions);
+  }
+
+  async sendUnverifiedMail(user: any, res: Response, req: Request){
+    let dbTXNClient: PoolClient;
+
+    try {
+      dbTXNClient = await this.dbClientPool.beginTransaction();
+    } catch (err) {
+      if (isError(err)) {
+        this.logger.log({
+          level: "error",
+          message: err.message,
+        });
+      }
+
+      return res.status(500).send({ 
+        message: errorMessages.generic
+      });
+    }
+
+    const emailVerificationToken = await this.createNewVerificationToken(user.user_id, dbTXNClient);
+    this.sendVerificationEmail(req, user, emailVerificationToken);
+
+    await this.dbClientPool.commitTransaction(dbTXNClient);
   }
 
   async sendPasswordResetEmail(req: Request, user: any) {
@@ -349,7 +384,7 @@ class AuthController {
       user.user_id
     );
 
-    await this.smtpService.sendEmail(emailOptions);
+    this.smtpService.sendEmail(emailOptions);
   }
 }
 
