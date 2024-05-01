@@ -126,6 +126,7 @@ class AuthController {
       if (!user.verified) {
         this.sendUnverifiedMail(user, res, req);
       }
+      
 
       const { token, cookieOptions } = await this.tokenHandler.generateUserAuthToken(user, req);
 
