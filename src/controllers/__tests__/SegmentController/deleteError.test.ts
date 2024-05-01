@@ -2,13 +2,13 @@ import { getMockReq, getMockRes } from "@jest-mock/express";
 import { constructBottle } from "../../../bottle";
 import SegmentService from "../../../services/segment.service";
 import ProjectService from  "../../../services/project.service";
-import IssueService from "../../../services/issue.service";
 import { setTestEnvironmentVars } from "../helpers";
+import ErrorService from "../../../services/error.service";
 
 jest.mock("pg");
 jest.mock("nodemailer");
 
-describe("tests deleteSegmentIssue method", () => {
+describe("tests deleteError method", () => {
   beforeEach(() => {
     setTestEnvironmentVars();
     jest.restoreAllMocks();
@@ -24,7 +24,7 @@ describe("tests deleteSegmentIssue method", () => {
       role: "user",
     });
 
-    jest.spyOn(SegmentService.prototype, "getSegmentByIssueId").mockResolvedValueOnce({ 
+    jest.spyOn(SegmentService.prototype, "getSegmentByErrorId").mockResolvedValueOnce({ 
       rows: [], 
       command: "", 
       rowCount: 0, 
@@ -32,7 +32,7 @@ describe("tests deleteSegmentIssue method", () => {
       fields: [] 
     });
 
-    await bottle.container.SegmentController.deleteSegmentIssue(req, res);
+    await bottle.container.SegmentController.deleteError(req, res);
 
     expect(res.status).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(404);
@@ -48,7 +48,7 @@ describe("tests deleteSegmentIssue method", () => {
       role: "user",
     });
 
-    jest.spyOn(SegmentService.prototype, "getSegmentByIssueId").mockResolvedValueOnce({ 
+    jest.spyOn(SegmentService.prototype, "getSegmentByErrorId").mockResolvedValueOnce({ 
       rows: [{ project_id: 10 }], 
       command: "", 
       rowCount: 1, 
@@ -63,13 +63,13 @@ describe("tests deleteSegmentIssue method", () => {
       fields: [] 
     });
 
-    await bottle.container.SegmentController.deleteSegmentIssue(req, res);
+    await bottle.container.SegmentController.deleteError(req, res);
 
     expect(res.status).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(403);
   });
 
-  it("should call deleteSegmentIssueById with errorId", async () => {
+  it("should call deleteErrorById with errorId", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
@@ -79,8 +79,8 @@ describe("tests deleteSegmentIssue method", () => {
       role: "user",
     });
 
-    jest.spyOn(IssueService.prototype, "deleteSegmentIssueById");
-    jest.spyOn(SegmentService.prototype, "getSegmentByIssueId").mockResolvedValueOnce({ 
+    jest.spyOn(ErrorService.prototype, "deleteErrorById");
+    jest.spyOn(SegmentService.prototype, "getSegmentByErrorId").mockResolvedValueOnce({ 
       rows: [{ project_id: 10 }], 
       command: "", 
       rowCount: 1, 
@@ -95,12 +95,12 @@ describe("tests deleteSegmentIssue method", () => {
       fields: [] 
     });
 
-    await bottle.container.SegmentController.deleteSegmentIssue(req, res);
+    await bottle.container.SegmentController.deleteError(req, res);
 
     expect(res.status).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(204);
 
-    expect(IssueService.prototype.deleteSegmentIssueById).toHaveBeenCalledTimes(1);
-    expect(IssueService.prototype.deleteSegmentIssueById).toHaveBeenCalledWith(req.params.issueId);
+    expect(ErrorService.prototype.deleteErrorById).toHaveBeenCalledTimes(1);
+    expect(ErrorService.prototype.deleteErrorById).toHaveBeenCalledWith(req.params.errorId);
   });
 });

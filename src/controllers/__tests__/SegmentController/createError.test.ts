@@ -2,13 +2,13 @@ import { getMockReq, getMockRes } from "@jest-mock/express";
 import { constructBottle } from "../../../bottle";
 import SegmentService from "../../../services/segment.service";
 import ProjectService from "../../../services/project.service";
-import IssueService from "../../../services/issue.service";
 import { setTestEnvironmentVars } from "../helpers";
+import ErrorService from "../../../services/error.service";
 
 jest.mock("pg");
 jest.mock("nodemailer");
 
-describe("tests createSegmentIssue method", () => {
+describe("tests createError method", () => {
   beforeEach(() => {
     setTestEnvironmentVars();
     jest.restoreAllMocks();
@@ -32,7 +32,7 @@ describe("tests createSegmentIssue method", () => {
       role: "user",
     });
 
-    await bottle.container.SegmentController.createSegmentIssue(req, res);
+    await bottle.container.SegmentController.createError(req, res);
 
     expect(res.status).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(400);
@@ -65,7 +65,7 @@ describe("tests createSegmentIssue method", () => {
       fields: [] 
     });
 
-    await bottle.container.SegmentController.createSegmentIssue(req, res);
+    await bottle.container.SegmentController.createError(req, res);
 
     expect(res.status).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(404);
@@ -112,13 +112,13 @@ describe("tests createSegmentIssue method", () => {
       fields: [] 
     });
 
-    await bottle.container.SegmentController.createSegmentIssue(req, res);
+    await bottle.container.SegmentController.createError(req, res);
 
     expect(res.status).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(403);
   });
 
-  it("should call addSegmentIssue with segmentId, note, highlighting, issue, level, type, highlightStartIndex, highlightEndIndex", async () => {
+  it("should call addError with segmentId, note, highlighting, issue, level, type, highlightStartIndex, highlightEndIndex", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
@@ -137,7 +137,7 @@ describe("tests createSegmentIssue method", () => {
       role: "user",
     });
     
-    jest.spyOn(IssueService.prototype, "addSegmentIssue");
+    jest.spyOn(ErrorService.prototype, "addError");
     jest.spyOn(SegmentService.prototype, "getSegmentById").mockResolvedValueOnce({ 
       rows: [{ project_id: 10 }], 
       command: "", 
@@ -153,13 +153,13 @@ describe("tests createSegmentIssue method", () => {
       fields: [] 
     });
 
-    await bottle.container.SegmentController.createSegmentIssue(req, res);
+    await bottle.container.SegmentController.createError(req, res);
 
     expect(res.status).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(204);
 
-    expect(IssueService.prototype.addSegmentIssue).toHaveBeenCalledTimes(1);
-    expect(IssueService.prototype.addSegmentIssue).toHaveBeenCalledWith(
+    expect(ErrorService.prototype.addError).toHaveBeenCalledTimes(1);
+    expect(ErrorService.prototype.addError).toHaveBeenCalledWith(
       "10", 
       req.body.note, 
       req.body.highlighting, 

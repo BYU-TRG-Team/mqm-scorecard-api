@@ -7,20 +7,20 @@ export default (app: Express, bottle: Bottle) => {
     "/api/segment/:segmentId/error",
     verifyToken(bottle.container.CleanEnv),
     checkVerification,
-    bottle.container.SegmentController.createSegmentIssue.bind(bottle.container.SegmentController),
+    bottle.container.SegmentController.createError.bind(bottle.container.SegmentController),
   );
 
   app.delete(
-    "/api/segment/error/:issueId",
+    "/api/segment/error/:errorId",
     verifyToken(bottle.container.CleanEnv),
     checkVerification,
-    bottle.container.SegmentController.deleteSegmentIssue.bind(bottle.container.SegmentController),
+    bottle.container.SegmentController.deleteError.bind(bottle.container.SegmentController),
   );
 
   app.patch(
-    "/api/segment/error/:issueId",
+    "/api/segment/error/:errorId",
     verifyToken(bottle.container.CleanEnv),
     checkVerification,
-    bottle.container.SegmentController.patchSegmentIssue.bind(bottle.container.SegmentController),
+    bottle.container.SegmentController.patchError.bind(bottle.container.SegmentController),
   );
 };

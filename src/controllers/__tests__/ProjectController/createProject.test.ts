@@ -15,6 +15,7 @@ import validSpecificationsFile from "../../../testing/files/valid-specifications
 import emptyFile from "../../../testing/files/empty-file";
 import DBClientPool from "../../../db-client-pool";
 import ProjectService from "../../../services/project.service";
+import ErrorService from "../../../services/error.service";
 
 jest.mock("pg");
 jest.mock("nodemailer");
@@ -34,6 +35,9 @@ describe("tests createProject method", () => {
       },
       files: {
         bitextFile: "test",
+      },
+      params: {
+        projectId: "2",
       },
     });
 
@@ -60,6 +64,9 @@ describe("tests createProject method", () => {
         bitextFile: validBitextFile,
         metricFile: metricFileWithNoIssues,
       },
+      params: {
+        projectId: "2",
+      },
       role: "superadmin",
     });
 
@@ -68,6 +75,13 @@ describe("tests createProject method", () => {
       rows: ["test"], 
       command: "", 
       rowCount: 1, 
+      oid: 0, 
+      fields: [] 
+    });
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
+      rows: [], 
+      command: "", 
+      rowCount: 0, 
       oid: 0, 
       fields: [] 
     });    
@@ -97,6 +111,9 @@ describe("tests createProject method", () => {
         bitextFile: validBitextFile,
         metricFile: metricFileWithNoType,
       },
+      params: {
+        projectId: "2",
+      },
       role: "superadmin",
     });
 
@@ -105,6 +122,13 @@ describe("tests createProject method", () => {
       rows: ["test"], 
       command: "", 
       rowCount: 1, 
+      oid: 0, 
+      fields: [] 
+    });
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
+      rows: [], 
+      command: "", 
+      rowCount: 0, 
       oid: 0, 
       fields: [] 
     });    
@@ -134,6 +158,9 @@ describe("tests createProject method", () => {
         bitextFile: validBitextFile,
         metricFile: metricFileWithNoDisplay,
       },
+      params: {
+        projectId: "2",
+      },
       role: "superadmin",
     });
 
@@ -144,7 +171,14 @@ describe("tests createProject method", () => {
       rowCount: 1, 
       oid: 0, 
       fields: [] 
-    });    
+    });
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
+      rows: [], 
+      command: "", 
+      rowCount: 0, 
+      oid: 0, 
+      fields: [] 
+    });     
 
     await bottle.container.ProjectController.createProject(req, res);
 
@@ -171,6 +205,9 @@ describe("tests createProject method", () => {
         bitextFile: validBitextFile,
         metricFile: metricFileTooDeep,
       },
+      params: {
+        projectId: "2",
+      },
       role: "superadmin",
     });
 
@@ -181,7 +218,14 @@ describe("tests createProject method", () => {
       rowCount: 1, 
       oid: 0, 
       fields: [] 
-    });    
+    });
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
+      rows: [], 
+      command: "", 
+      rowCount: 0, 
+      oid: 0, 
+      fields: [] 
+    });      
 
     await bottle.container.ProjectController.createProject(req, res);
 
@@ -208,6 +252,9 @@ describe("tests createProject method", () => {
         bitextFile: validBitextFile,
         metricFile: emptyFile,
       },
+      params: {
+        projectId: "2",
+      },
       role: "superadmin",
     });
 
@@ -218,7 +265,14 @@ describe("tests createProject method", () => {
       rowCount: 1, 
       oid: 0, 
       fields: [] 
-    });    
+    });
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
+      rows: [], 
+      command: "", 
+      rowCount: 0, 
+      oid: 0, 
+      fields: [] 
+    });
 
     await bottle.container.ProjectController.createProject(req, res);
 
@@ -246,6 +300,9 @@ describe("tests createProject method", () => {
         bitextFile: bitextFileWithErroredLine,
         metricFile: validMetricFile,
       },
+      params: {
+        projectId: "2",
+      },
       role: "superadmin",
     });
 
@@ -256,7 +313,14 @@ describe("tests createProject method", () => {
       rowCount: 1, 
       oid: 0, 
       fields: [] 
-    });    
+    });
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
+      rows: [], 
+      command: "", 
+      rowCount: 0, 
+      oid: 0, 
+      fields: [] 
+    });
 
     await bottle.container.ProjectController.createProject(req, res);
 
@@ -283,6 +347,9 @@ describe("tests createProject method", () => {
         bitextFile: bitextFileWithOneColumn,
         metricFile: validMetricFile,
       },
+      params: {
+        projectId: "2",
+      },
       role: "superadmin",
     });
 
@@ -293,7 +360,14 @@ describe("tests createProject method", () => {
       rowCount: 1, 
       oid: 0, 
       fields: [] 
-    });    
+    });
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
+      rows: [], 
+      command: "", 
+      rowCount: 0, 
+      oid: 0, 
+      fields: [] 
+    });
 
     await bottle.container.ProjectController.createProject(req, res);
 
@@ -320,6 +394,9 @@ describe("tests createProject method", () => {
         bitextFile: emptyFile,
         metricFile: validMetricFile,
       },
+      params: {
+        projectId: "2",
+      },
       role: "superadmin",
     });
 
@@ -330,7 +407,14 @@ describe("tests createProject method", () => {
       rowCount: 1, 
       oid: 0, 
       fields: [] 
-    });    
+    });
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
+      rows: [], 
+      command: "", 
+      rowCount: 0, 
+      oid: 0, 
+      fields: [] 
+    });
 
     await bottle.container.ProjectController.createProject(req, res);
 
@@ -357,6 +441,9 @@ describe("tests createProject method", () => {
         bitextFile: validBitextFile,
         metricFile: validMetricFile,
         specificationsFile: validSpecificationsFile,
+      },
+      params: {
+        projectId: "2",
       },
       role: "superadmin",
     });
@@ -534,6 +621,13 @@ describe("tests createProject method", () => {
           fields: [] 
         });
       });
+    });
+    jest.spyOn(ErrorService.prototype, "getErrorsByProjectId").mockResolvedValueOnce({ 
+      rows: [], 
+      command: "", 
+      rowCount: 0, 
+      oid: 0, 
+      fields: [] 
     });
 
     await bottle.container.ProjectController.createProject(req, res);

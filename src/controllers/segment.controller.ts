@@ -1,6 +1,6 @@
 import { Logger } from "winston";
 import errorMessages from "../messages/errors.messages";
-import IssueService from "../services/issue.service";
+import ErrorService from "../services/error.service";
 import ProjectService from "../services/project.service";
 import SegmentService from "../services/segment.service";
 import { Request, Response } from "express";
@@ -10,7 +10,7 @@ class SegmentController {
   constructor(
     private readonly segmentService: SegmentService, 
     private readonly projectService: ProjectService, 
-    private readonly issueService: IssueService, 
+    private readonly errorService: ErrorService,
     private readonly logger: Logger
   ) {}
 
@@ -24,7 +24,7 @@ class SegmentController {
   * @highlightStartIndex
   * @highlightEndIndex
   */
-  async createSegmentIssue(req: Request, res: Response) {
+  async createError(req: Request, res: Response) {
     const {
       note, 
       highlighting, 
@@ -58,7 +58,16 @@ class SegmentController {
         });
       }
 
-      await this.issueService.addSegmentIssue(req.params.segmentId, note, highlighting, issue, level, type, highlightStartIndex, highlightEndIndex);
+      await this.errorService.addError(
+        req.params.segmentId, 
+        note, 
+        highlighting, 
+        issue, 
+        level, 
+        type, 
+        highlightStartIndex, 
+        highlightEndIndex
+      );
       return res.status(204).send();
     } catch (err) {
       if (isError(err)) {
@@ -75,11 +84,11 @@ class SegmentController {
   }
 
   /*
-  * DELETE /api/segment/error/:issueId
+  * DELETE /api/segment/error/:errorId
   */
-  async deleteSegmentIssue(req: Request, res: Response) {
+  async deleteError(req: Request, res: Response) {
     try {
-      const segmentResponse = await this.segmentService.getSegmentByIssueId(req.params.issueId);
+      const segmentResponse = await this.segmentService.getSegmentByErrorId(req.params.errorId);
 
       if (segmentResponse.rows.length === 0) {
         return res.status(404).send({ 
@@ -95,7 +104,7 @@ class SegmentController {
         });
       }
 
-      await this.issueService.deleteSegmentIssueById(req.params.issueId);
+      await this.errorService.deleteErrorById(req.params.errorId);
       return res.status(204).send();
     } catch (err) {
       if (isError(err)) {
@@ -112,18 +121,18 @@ class SegmentController {
   }
 
   /*
-  * PATCH /api/segment/error/:issueId
+  * PATCH /api/segment/error/:errorId
   * @note
   * @issue
   * @level
   */
-  async patchSegmentIssue(req: Request, res: Response) {
+  async patchError(req: Request, res: Response) {
     const {
       note, issue, level
     } = req.body;
     
     try {
-      const segmentResponse = await this.segmentService.getSegmentByIssueId(req.params.issueId);
+      const segmentResponse = await this.segmentService.getSegmentByErrorId(req.params.errorId);
 
       if (segmentResponse.rows.length === 0) {
         return res.status(400).send({ message: "No segment found" });
@@ -137,16 +146,16 @@ class SegmentController {
         });
       }
 
-      const segmentIssueResponse =  await this.issueService.getSegmentIssueById(req.params.issueId);
-      const segmentIssue = segmentIssueResponse.rows[0];
-      const updatedSegmentIssue = {
-        ...segmentIssue,
+      const errorResponse =  await this.errorService.getErrorById(req.params.errorId);
+      const error = errorResponse.rows[0];
+      const updatedError = {
+        ...error,
         ...(note !== undefined && { note }),
         ...(issue !== undefined && { issue }),
         ...(level !== undefined && { level })
       };
 
-      await this.issueService.updateSegmentIssue(updatedSegmentIssue);
+      await this.errorService.updateError(updatedError);
 
       return res.status(204).send();
     } catch (err) {

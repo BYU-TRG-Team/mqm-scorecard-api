@@ -6,6 +6,7 @@ import FileParser from "../support/fileparser.support";
 import ProjectService from "../services/project.service";
 import IssueService from "../services/issue.service";
 import SegmentService from "../services/segment.service";
+import ErrorService from "../services/error.service";
 import IssueParser from "../support/issueparser.support";
 import { Logger } from "winston";
 import { Request, Response } from "express";
@@ -20,6 +21,7 @@ class ProjectController {
     private readonly projectService: ProjectService, 
     private readonly issueService: IssueService, 
     private readonly segmentService: SegmentService, 
+    private readonly errorService: ErrorService,
     private readonly issueParser: IssueParser, 
     private readonly logger: Logger
   ) {}
@@ -136,14 +138,14 @@ class ProjectController {
       const issueResponse = await this.issueService.getProjectIssuesById(project.project_id);
       const report = await this.createReport(project.project_id);
 
-      // Organize segment errors by source and target
+      // Organize errors by source and target
       for (let i = 0; i < projectSegmentsResponse.rows.length; ++i) {
         const { id } = projectSegmentsResponse.rows[i];
-        const segmentIssues = await this.issueService.getSegmentIssuesBySegmentId(id);
-        const sourceIssues = segmentIssues.rows.filter((issue) => issue.type === "source");
-        const targetIssues = segmentIssues.rows.filter((issue) => issue.type === "target");
-        projectSegmentsResponse.rows[i].sourceErrors = sourceIssues;
-        projectSegmentsResponse.rows[i].targetErrors = targetIssues;
+        const errors = await this.errorService.getErrorsBySegmentId(id);
+        const sourceErrors = errors.rows.filter((error) => error.type === "source");
+        const targetErrors = errors.rows.filter((error) => error.type === "target");
+        projectSegmentsResponse.rows[i].sourceErrors = sourceErrors;
+        projectSegmentsResponse.rows[i].targetErrors = targetErrors;
       }
 
       return res.json({
@@ -179,57 +181,46 @@ class ProjectController {
         });
       }
 
-      const metric = (await this.issueService.getProjectIssuesById(req.params.projectId)).rows;
+      const projectIssues = (await this.issueService.getProjectIssuesById(req.params.projectId)).rows;
 
-      // Maps metric to JSON format required by Python app
-      const metricJSONTranslator = (rawMetric: any) => {
-        const translator = {
-          to: "issueId",
-          from: "issue",
-        };
-
-        const translateIssue = (issue: any) => {
-          if (issue[translator.from]) {
-            issue[translator.to] = issue[translator.from];
-            delete issue[translator.from];
-          }
-        };
-
-        rawMetric.forEach((issue: any) => translateIssue(issue));
-      };
-
-      metricJSONTranslator(metric);
+      // Convert project issues (i.e. metric) to format required by Python app
+      projectIssues.forEach(issue => {
+        if (issue["issue"]) {
+          issue["issueId"] = issue["issue"];
+          delete issue["issue"];
+        }
+      });
 
       const projectResponse = await this.projectService.getProjectById(req.params.projectId);
       const projectSegmentsResponse = await this.segmentService.getSegmentsByProjectId(req.params.projectId);
-      const projectSegmentIssuesResponse = await this.issueService.getSegmentIssuesByProjectId(req.params.projectId);
+      const errorsResponse = await this.errorService.getErrorsByProjectId(req.params.projectId);
       const apt = await this.calculateApt(req.params.projectId);
-      const { name } = projectResponse.rows[0];
+      const { name: projectName } = projectResponse.rows[0];
       const key: {[key: string]: any} = {};
 
-      projectSegmentsResponse.rows.forEach((seg: any) => {
-        key[seg.id] = String(seg.segment_num);
+      projectSegmentsResponse.rows.forEach((segment: any) => {
+        key[segment.id] = String(segment.segment_num);
       });
 
       return res.json({
-        projectName: name,
+        projectName,
         key,
-        errors: projectSegmentIssuesResponse.rows.map((segmentIssue) => (
+        errors: errorsResponse.rows.map((error) => (
           {
-            segment: String(segmentIssue.segment_id),
-            target: segmentIssue.type,
-            name: segmentIssue.issue_name,
-            severity: segmentIssue.level,
-            issueReportId: String(segmentIssue.id),
-            issueId: segmentIssue.issue,
-            note: segmentIssue.note,
+            segment: String(error.segment_id),
+            target: error.type,
+            name: error.issue_name,
+            severity: error.level,
+            issueReportId: String(error.id),
+            issueId: error.issue,
+            note: error.note,
             highlighting: {
-              startIndex: segmentIssue.highlight_start_index,
-              endIndex: segmentIssue.highlight_end_index,
+              startIndex: error.highlight_start_index,
+              endIndex: error.highlight_end_index,
             },
           }
         )),
-        metric,
+        metric: projectIssues,
         apt,
         segments: {
           source: projectSegmentsResponse.rows.map((seg) => seg.segment_data.Source),
@@ -327,7 +318,7 @@ class ProjectController {
 
       const userResponse = await this.userService.findUsers(["username"], [username]);
 
-      if (userResponse.rows.length === 0) {
+      if (!userResponse.rows.length) {
         return res.status(404).json({ 
           message: `No user found with the username "${username}"` 
         });
@@ -437,11 +428,9 @@ class ProjectController {
         });
       }
 
-      const hasSegmentIssues = projectId && await this.hasSegmentIssues(projectId);
-
-      if ((metricFile !== undefined || bitextFile !== undefined) && hasSegmentIssues) {
+      if ((metricFile !== undefined || bitextFile !== undefined) && await this.hasErrors(projectId)) {
         return res.status(400).json({ 
-          message: "Changing the bi-text or metric files is not possible until all reported issues are removed." 
+          message: "Changing the bi-text or metric files is not possible until all reported errors are removed." 
         });
       }
     } catch (err) {
@@ -482,7 +471,6 @@ class ProjectController {
         );
       } catch(err) {
         const errMessage = isError(err) ? err.message : "";
-
         return res.status(400).json({ 
           message: `Problem parsing metric file: ${errMessage}` 
         });
@@ -607,27 +595,27 @@ class ProjectController {
       if (metricFile !== undefined && isAdmin) {
         // Save issues from metric file
         for (let i = 0; i < metric.length; ++i) {
-          const selectedIssue = metric[i];
-          const issueResponse = await this.issueService.getIssueById(selectedIssue.issue, dbTXNClient);
+          const issue = metric[i];
+          const issueResponse = await this.issueService.getIssueById(issue.issue, dbTXNClient);
 
-          if (issueResponse.rows.length === 0) {
+          if (!issueResponse.rows.length) {
             await this.dbClientPool.rollbackTransaction(dbTXNClient);
             return res.status(400).json({ 
-              message: `Issue type "${selectedIssue.issue}" does not exist in the typology` 
+              message: `Issue "${issue.issue}" does not exist in the typology` 
             });
           }
 
-          if (issueResponse.rows[0].parent !== selectedIssue.parent) {
+          if (issueResponse.rows[0].parent !== issue.parent) {
             await this.dbClientPool.rollbackTransaction(dbTXNClient);
             return res.status(400).json({
-              message: `Issue type "${selectedIssue.issue}" does not have the parent issue type "${selectedIssue.parent}"` 
+              message: `Issue "${issue.issue}" does not have the parent issue "${issue.parent}"` 
             });
           }
 
           await this.issueService.createProjectIssue(
             projectId, 
-            selectedIssue.issue, 
-            selectedIssue.display, 
+            issue.issue, 
+            issue.display, 
             dbTXNClient
           );
         }
@@ -690,51 +678,38 @@ class ProjectController {
     return issueResponse.rows.length > 0;
   }
 
-  async hasSegmentIssues(projectId: any) {
-    const projectSegmentsResponse = await this.segmentService.getSegmentsByProjectId(projectId);
-
-    for (let i = 0; i < projectSegmentsResponse.rows.length; ++i) {
-      const { id } = projectSegmentsResponse.rows[i];
-      const segmentIssues = await this.issueService.getSegmentIssuesBySegmentId(id);
-
-      if (segmentIssues.rows.length > 0) {
-        return true;
-      }
-    }
-
-    return false;
+  async hasErrors(projectId: any) {
+    const errorsResponse = await this.errorService.getErrorsByProjectId(projectId);
+    return !!errorsResponse.rows.length;
   }
 
   async createReport(projectId: any) {
-    const reportResponse = await this.issueService.getProjectReportById(projectId);
-    const report: {[key: string]: any} = {};
+    const errorsResponse = await this.errorService.getErrorsByProjectId(projectId);
+    const report: {[issue: string]: [
+      number, // source neutral error count
+      number, // source minor error count
+      number, // source major error count
+      number, // source critical error count
+      number, // total source error count
+      number, // target neutral error count
+      number, // target minor error count
+      number, // target major error count
+      number, // target critical error count
+      number, // total target error count
+      number // total error count
+    ]} = {};
 
-    reportResponse.rows.forEach((issue) => {
-      const sourceNetural = issue.level.filter((level: any, index: any) => level === "neutral" && issue.type[index] === "source").length;
-      const sourceMinor = issue.level.filter((level: any, index: any) => level === "minor" && issue.type[index] === "source").length;
-      const sourceMajor = issue.level.filter((level: any, index: any) => level === "major" && issue.type[index] === "source").length;
-      const sourceCritical = issue.level.filter((level: any, index: any) => level === "critical" && issue.type[index] === "source").length;
+    errorsResponse.rows.forEach((error) => {
+      const indexOffset = error.type === "target" ? 5 : 0;
+      const severities = ["neutral", "minor", "major", "critical"];
 
-      const targetNetural = issue.level.filter((level: any, index: any) => level === "neutral" && issue.type[index] === "target").length;
-      const targetMinor = issue.level.filter((level: any, index: any) => level === "minor" && issue.type[index] === "target").length;
-      const targetMajor = issue.level.filter((level: any, index: any) => level === "major" && issue.type[index] === "target").length;
-      const targetCritical = issue.level.filter((level: any, index: any) => level === "critical" && issue.type[index] === "target").length;
+      if (!report[error.issue]) {
+        report[error.issue] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      }
 
-      report[issue.issue] = [
-        // Source issues
-        sourceNetural,
-        sourceMinor,
-        sourceMajor,
-        sourceCritical,
-        sourceNetural + sourceMinor + sourceMajor + sourceCritical,
-        // Target issues
-        targetNetural,
-        targetMinor,
-        targetMajor,
-        targetCritical,
-        targetNetural + targetMinor + targetMajor + targetCritical,
-        sourceNetural + sourceMinor + sourceMajor + sourceCritical + targetNetural + targetMinor + targetMajor + targetCritical,
-      ];
+      report[error.issue][severities.indexOf(error.level) + indexOffset] += 1;
+      report[error.issue][4 + indexOffset] += 1;
+      report[error.issue][10] += 1;
     });
 
     return report;
@@ -742,7 +717,7 @@ class ProjectController {
 
   async calculateApt(projectId: any) {
     let apt = 0;
-    const reportResponse = await this.issueService.getProjectReportById(projectId);
+    const errorsResponse = await this.errorService.getErrorsByProjectId(projectId);
     const severityWeights: {[key: string]: any} = {
       neutral: 0,
       minor: 1,
@@ -750,12 +725,8 @@ class ProjectController {
       critical: 25,
     };
 
-    reportResponse.rows.forEach((issue) => {
-      issue.level.forEach((level: any) => {
-        if (level !== null) {
-          apt += severityWeights[level];
-        }
-      });
+    errorsResponse.rows.forEach((error) => {
+      apt += severityWeights[error.level];
     });
 
     return apt;
