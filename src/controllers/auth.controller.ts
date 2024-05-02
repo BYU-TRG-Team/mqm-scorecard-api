@@ -126,7 +126,7 @@ class AuthController {
       if (!user.verified) {
         this.sendUnverifiedMail(user, res, req);
       }
-      
+
 
       const { token, cookieOptions } = await this.tokenHandler.generateUserAuthToken(user, req);
 
@@ -339,6 +339,8 @@ class AuthController {
       <p>Please <a href="${link}">visit this link</a> to verify your account.</p> 
       <p>If you did not request this, please ignore this email.</p>`,
     };
+
+    console.log(emailOptions, "Options");
 
     return this.smtpService.sendEmail(emailOptions);
   }
