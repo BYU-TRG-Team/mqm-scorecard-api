@@ -69,8 +69,8 @@ class AuthController {
 
       const newUser = userResponse.rows[0];
 
-      this.sendUnverifiedMail(newUser, res, req);
-
+      const emailVerificationToken = await this.createNewVerificationToken(newUser.user_id, dbTXNClient);
+      this.sendVerificationEmail(req, newUser, emailVerificationToken);
       await this.dbClientPool.commitTransaction(dbTXNClient);
       return res.status(204).send();
     } catch (err) {
@@ -126,7 +126,7 @@ class AuthController {
       if (!user.verified) {
         this.sendUnverifiedMail(user, res, req);
       }
-      
+
 
       const { token, cookieOptions } = await this.tokenHandler.generateUserAuthToken(user, req);
 
@@ -362,8 +362,9 @@ class AuthController {
     }
 
     const emailVerificationToken = await this.createNewVerificationToken(user.user_id, dbTXNClient);
+    this.sendVerificationEmail(req, user, emailVerificationToken);
 
-    return this.sendVerificationEmail(req, user, emailVerificationToken);
+    await this.dbClientPool.commitTransaction(dbTXNClient);
   }
 
   async sendPasswordResetEmail(req: Request, user: any) {
