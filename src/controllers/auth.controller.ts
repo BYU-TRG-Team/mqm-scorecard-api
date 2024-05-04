@@ -7,7 +7,7 @@ import TokenHandler from "../support/tokenhandler.support";
 import DBClientPool from "../db-client-pool";
 import { Logger } from "winston";
 import { CleanEnv } from "../clean-env";
-import { PoolClient } from "pg";
+import { DBClient } from "src/typings/db";
 import { isError } from "../type-guards";
 import { Request, Response } from "express";
 
@@ -30,7 +30,7 @@ class AuthController {
   * @name
   */
   async signup(req: Request, res: Response) {
-    let dbTXNClient: PoolClient;
+    let dbTXNClient: DBClient;
     const {
       username, email, password, name,
     } = req.body;
@@ -69,8 +69,8 @@ class AuthController {
 
       const newUser = userResponse.rows[0];
 
-      const emailVerificationToken = await this.createNewVerificationToken(newUser.user_id, dbTXNClient);
-      this.sendVerificationEmail(req, newUser, emailVerificationToken);
+      this.sendUnverifiedMail(newUser, res, req);
+
       await this.dbClientPool.commitTransaction(dbTXNClient);
       return res.status(204).send();
     } catch (err) {
@@ -126,7 +126,7 @@ class AuthController {
       if (!user.verified) {
         this.sendUnverifiedMail(user, res, req);
       }
-
+      
 
       const { token, cookieOptions } = await this.tokenHandler.generateUserAuthToken(user, req);
 
@@ -318,7 +318,7 @@ class AuthController {
     }
   }
 
-  async createNewVerificationToken(user_id: number, dbClient: PoolClient) {
+  async createNewVerificationToken(user_id: number, dbClient: DBClient) {
     const emailVerificationToken = this.tokenHandler.generateEmailVerificationToken();
     await this.tokenService.create(
       user_id, 
@@ -340,13 +340,11 @@ class AuthController {
       <p>If you did not request this, please ignore this email.</p>`,
     };
 
-    console.log(emailOptions, "Options");
-
     return this.smtpService.sendEmail(emailOptions);
   }
 
   async sendUnverifiedMail(user: any, res: Response, req: Request){
-    let dbTXNClient: PoolClient;
+    let dbTXNClient: DBClient;
 
     try {
       dbTXNClient = await this.dbClientPool.beginTransaction();
@@ -364,9 +362,8 @@ class AuthController {
     }
 
     const emailVerificationToken = await this.createNewVerificationToken(user.user_id, dbTXNClient);
-    this.sendVerificationEmail(req, user, emailVerificationToken);
 
-    await this.dbClientPool.commitTransaction(dbTXNClient);
+    return this.sendVerificationEmail(req, user, emailVerificationToken);
   }
 
   async sendPasswordResetEmail(req: Request, user: any) {
