@@ -7,7 +7,7 @@ import TokenHandler from "../support/tokenhandler.support";
 import DBClientPool from "../db-client-pool";
 import { Logger } from "winston";
 import { CleanEnv } from "../clean-env";
-import { DBClient } from "src/typings/db";
+import { DBClient } from "../typings/db";
 import { isError } from "../type-guards";
 import { Request, Response } from "express";
 
@@ -102,7 +102,25 @@ class AuthController {
       });
     }
 
+    let dbTXNClient: DBClient;
+
     try {
+      dbTXNClient = await this.dbClientPool.beginTransaction();
+    } catch (err) {
+      if (isError(err)) {
+        this.logger.log({
+          level: "error",
+          message: err.message,
+        });
+      }
+
+      return res.status(500).send({ 
+        message: errorMessages.generic
+      });
+    }
+
+    try {
+      // No need for db transaction on userResponse method here, simple query.
       const userResponse = await this.userService.findUsers(["username"], [username]);
 
       if (userResponse.rows.length === 0) {
@@ -124,13 +142,16 @@ class AuthController {
       }
 
       if (!user.verified) {
-        this.sendUnverifiedMail(user, res, req);
+        this.sendUnverifiedMail(user, res, req, dbTXNClient);
       }
 
 
       const { token, cookieOptions } = await this.tokenHandler.generateUserAuthToken(user, req);
 
       res.cookie("scorecard_authtoken", token, cookieOptions);
+
+      await this.dbClientPool.commitTransaction(dbTXNClient);
+
       return res.json({ token });
     } catch (err) {
       if (isError(err)) {
@@ -139,6 +160,8 @@ class AuthController {
           message: err.message,
         });
       }
+
+      await this.dbClientPool.rollbackTransaction(dbTXNClient);
       
       return res.status(500).send({ 
         message: errorMessages.generic 
@@ -318,10 +341,10 @@ class AuthController {
     }
   }
 
-  async createNewVerificationToken(user_id: number, dbClient: DBClient) {
+  async createNewVerificationToken(userId: number, dbClient: DBClient) {
     const emailVerificationToken = this.tokenHandler.generateEmailVerificationToken();
     await this.tokenService.create(
-      user_id, 
+      userId, 
       emailVerificationToken, 
       dbClient
     );
@@ -343,28 +366,20 @@ class AuthController {
     return this.smtpService.sendEmail(emailOptions);
   }
 
-  async sendUnverifiedMail(user: any, res: Response, req: Request){
-    let dbTXNClient: DBClient;
+  async cleanOutTokens(user: any, dbClient: DBClient){
+    const { rows: tokens } = await this.tokenService.findTokens(["user_id"], [user.user_id], dbClient);
 
-    try {
-      dbTXNClient = await this.dbClientPool.beginTransaction();
-    } catch (err) {
-      if (isError(err)) {
-        this.logger.log({
-          level: "error",
-          message: err.message,
-        });
-      }
-
-      return res.status(500).send({ 
-        message: errorMessages.generic
-      });
+    for( let t = 0; t < tokens.length; t++){
+      await this.tokenService.deleteToken(t, dbClient);
     }
+  }
 
-    const emailVerificationToken = await this.createNewVerificationToken(user.user_id, dbTXNClient);
+  async sendUnverifiedMail(user: any, res: Response, req: Request, dbClient: DBClient){
+
+    await this.cleanOutTokens(user, dbClient);
+
+    const emailVerificationToken = await this.createNewVerificationToken(user.user_id, dbClient);
     this.sendVerificationEmail(req, user, emailVerificationToken);
-
-    await this.dbClientPool.commitTransaction(dbTXNClient);
   }
 
   async sendPasswordResetEmail(req: Request, user: any) {

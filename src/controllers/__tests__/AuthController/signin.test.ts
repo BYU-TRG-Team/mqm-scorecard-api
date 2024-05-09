@@ -4,6 +4,7 @@ import { getMockReq, getMockRes } from "@jest-mock/express";
 import { constructBottle } from "../../../bottle";
 import { setTestEnvironmentVars } from "../helpers";
 import UserService from "../../../services/user.service";
+import DBClientPool from "../../../db-client-pool";
 
 jest.mock("pg");
 jest.mock("nodemailer");
