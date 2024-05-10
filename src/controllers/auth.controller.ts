@@ -350,10 +350,12 @@ class AuthController {
   }
 
   async deleteVerificationTokens(user: any, dbClient: DBClient){
-    const {rows: tokens} = await this.tokenService.findTokens(["user_id"], [user.user_id], dbClient);
+    const tokenResponse = await this.tokenService.findTokens(["user_id"], [user.user_id], dbClient);
 
-    for (let t = 0; t < tokens.length; t++) {
-      await this.tokenService.deleteToken(t, dbClient);
+    for (let t = 0; t < tokenResponse.rows.length; t++) {
+      const row = tokenResponse.rows[t];
+
+      await this.tokenService.deleteToken(row.token, dbClient);
     }
   }
 
