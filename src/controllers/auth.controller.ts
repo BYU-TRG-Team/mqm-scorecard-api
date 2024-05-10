@@ -69,8 +69,8 @@ class AuthController {
 
       const newUser = userResponse.rows[0];
 
-      const emailVerificationToken = await this.createNewVerificationToken(newUser.user_id, dbTXNClient);
-      this.sendVerificationEmail(req, newUser, emailVerificationToken);
+      this.sendUnverifiedMail(newUser, req, dbTXNClient);
+
       await this.dbClientPool.commitTransaction(dbTXNClient);
       return res.status(204).send();
     } catch (err) {
@@ -120,7 +120,7 @@ class AuthController {
     }
 
     try {
-      // No need for db transaction on userResponse method here, simple query.
+      // No need for db transaction on findUsers method here, simple query.
       const userResponse = await this.userService.findUsers(["username"], [username]);
 
       if (userResponse.rows.length === 0) {
@@ -142,14 +142,11 @@ class AuthController {
       }
 
       if (!user.verified) {
-        this.sendUnverifiedMail(user, res, req, dbTXNClient);
+        this.sendUnverifiedMail(user, req, dbTXNClient);
       }
 
-
       const { token, cookieOptions } = await this.tokenHandler.generateUserAuthToken(user, req);
-
       res.cookie("scorecard_authtoken", token, cookieOptions);
-
       await this.dbClientPool.commitTransaction(dbTXNClient);
 
       return res.json({ token });
@@ -341,7 +338,7 @@ class AuthController {
     }
   }
 
-  async createNewVerificationToken(userId: number, dbClient: DBClient) {
+  async createVerificationToken(userId: number, dbClient: DBClient) {
     const emailVerificationToken = this.tokenHandler.generateEmailVerificationToken();
     await this.tokenService.create(
       userId, 
@@ -366,19 +363,22 @@ class AuthController {
     return this.smtpService.sendEmail(emailOptions);
   }
 
-  async cleanOutTokens(user: any, dbClient: DBClient){
-    const { rows: tokens } = await this.tokenService.findTokens(["user_id"], [user.user_id], dbClient);
+  async deleteVerificationTokens(user: any, dbClient: DBClient){
+    const response = await this.tokenService.findTokens(["user_id"], [user.user_id], dbClient);
 
-    for( let t = 0; t < tokens.length; t++){
+    if (response?.rows == undefined) return;
+
+    const {rows: tokens} = response;
+
+    for (let t = 0; t < tokens.length; t++) {
       await this.tokenService.deleteToken(t, dbClient);
     }
   }
 
-  async sendUnverifiedMail(user: any, res: Response, req: Request, dbClient: DBClient){
+  async sendUnverifiedMail(user: any, req: Request, dbClient: DBClient){
+    this.deleteVerificationTokens(user, dbClient);
 
-    await this.cleanOutTokens(user, dbClient);
-
-    const emailVerificationToken = await this.createNewVerificationToken(user.user_id, dbClient);
+    const emailVerificationToken = await this.createVerificationToken(user.user_id, dbClient);
     this.sendVerificationEmail(req, user, emailVerificationToken);
   }
 
