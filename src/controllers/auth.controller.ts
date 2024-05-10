@@ -69,7 +69,7 @@ class AuthController {
 
       const newUser = userResponse.rows[0];
 
-      this.sendUnverifiedMail(newUser, req, dbTXNClient);
+      this.sendVerificationEmail(newUser, req, dbTXNClient);
 
       await this.dbClientPool.commitTransaction(dbTXNClient);
       return res.status(204).send();
@@ -142,7 +142,7 @@ class AuthController {
       }
 
       if (!user.verified) {
-        this.sendUnverifiedMail(user, req, dbTXNClient);
+        this.sendVerificationEmail(user, req, dbTXNClient);
       }
 
       const { token, cookieOptions } = await this.tokenHandler.generateUserAuthToken(user, req);
@@ -349,20 +349,6 @@ class AuthController {
     return emailVerificationToken;
   }
 
-  sendVerificationEmail(req: Request, user: any, token: string) {
-    const link = `http://${req.headers.host}/api/auth/verify/${token}`;
-    const emailOptions = {
-      subject: "Account Verification Request",
-      to: user.email,
-      from: this.cleanEnv.EMAIL_ADDRESS,
-      html: `<p>Hi ${user.username},<p>
-      <p>Please <a href="${link}">visit this link</a> to verify your account.</p> 
-      <p>If you did not request this, please ignore this email.</p>`,
-    };
-
-    return this.smtpService.sendEmail(emailOptions);
-  }
-
   async deleteVerificationTokens(user: any, dbClient: DBClient){
     const response = await this.tokenService.findTokens(["user_id"], [user.user_id], dbClient);
 
@@ -375,11 +361,21 @@ class AuthController {
     }
   }
 
-  async sendUnverifiedMail(user: any, req: Request, dbClient: DBClient){
+  async sendVerificationEmail(user: any, req: Request, dbClient: DBClient){
     this.deleteVerificationTokens(user, dbClient);
 
     const emailVerificationToken = await this.createVerificationToken(user.user_id, dbClient);
-    this.sendVerificationEmail(req, user, emailVerificationToken);
+    const link = `http://${req.headers.host}/api/auth/verify/${emailVerificationToken}`;
+    const emailOptions = {
+      subject: "Account Verification Request",
+      to: user.email,
+      from: this.cleanEnv.EMAIL_ADDRESS,
+      html: `<p>Hi ${user.username},<p>
+      <p>Please <a href="${link}">visit this link</a> to verify your account.</p> 
+      <p>If you did not request this, please ignore this email.</p>`,
+    };
+
+    return this.smtpService.sendEmail(emailOptions);
   }
 
   async sendPasswordResetEmail(req: Request, user: any) {

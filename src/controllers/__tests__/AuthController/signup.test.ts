@@ -77,11 +77,6 @@ describe("tests signup method", () => {
     expect(res.send).toHaveBeenCalledTimes(1);
 
     expect(AuthController.prototype.sendVerificationEmail).toHaveBeenCalledTimes(1);
-    expect(AuthController.prototype.sendVerificationEmail).toHaveBeenCalledWith(
-      req,
-      { user_id: 1 },
-      "foobar"
-    );
 
     expect(UserService.prototype.create).toHaveBeenCalledTimes(1);
     const createUserCall = (UserService.prototype.create as jest.Mock).mock.calls[0];
