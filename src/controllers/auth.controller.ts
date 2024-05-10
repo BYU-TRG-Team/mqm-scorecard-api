@@ -142,7 +142,7 @@ class AuthController {
       }
 
       if (!user.verified) {
-        this.sendVerificationEmail(user, req, dbTXNClient);
+        await this.sendVerificationEmail(user, req, dbTXNClient);
       }
 
       const { token, cookieOptions } = await this.tokenHandler.generateUserAuthToken(user, req);
