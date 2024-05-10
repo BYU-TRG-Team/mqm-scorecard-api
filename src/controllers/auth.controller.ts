@@ -350,11 +350,7 @@ class AuthController {
   }
 
   async deleteVerificationTokens(user: any, dbClient: DBClient){
-    const response = await this.tokenService.findTokens(["user_id"], [user.user_id], dbClient);
-
-    if (response?.rows == undefined) return;
-
-    const {rows: tokens} = response;
+    const {rows: tokens} = await this.tokenService.findTokens(["user_id"], [user.user_id], dbClient);
 
     for (let t = 0; t < tokens.length; t++) {
       await this.tokenService.deleteToken(t, dbClient);
@@ -362,7 +358,7 @@ class AuthController {
   }
 
   async sendVerificationEmail(user: any, req: Request, dbClient: DBClient){
-    this.deleteVerificationTokens(user, dbClient);
+    await this.deleteVerificationTokens(user, dbClient);
 
     const emailVerificationToken = await this.createVerificationToken(user.user_id, dbClient);
     const link = `http://${req.headers.host}/api/auth/verify/${emailVerificationToken}`;

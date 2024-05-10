@@ -68,6 +68,13 @@ describe("tests signup method", () => {
       oid: 0, 
       fields: [] 
     });
+    jest.spyOn(TokenService.prototype, "findTokens").mockResolvedValueOnce({ 
+      rows: [], 
+      command: "", 
+      rowCount: 0, 
+      oid: 0, 
+      fields: [] 
+    });
 
     await bottle.container.AuthController.signup(req, res);
 
