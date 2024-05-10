@@ -7,7 +7,7 @@ import TokenHandler from "../support/tokenhandler.support";
 import DBClientPool from "../db-client-pool";
 import { Logger } from "winston";
 import { CleanEnv } from "../clean-env";
-import { PoolClient } from "pg";
+import { DBClient } from "../typings/db";
 import { isError } from "../type-guards";
 import { Request, Response } from "express";
 
@@ -30,7 +30,7 @@ class AuthController {
   * @name
   */
   async signup(req: Request, res: Response) {
-    let dbTXNClient: PoolClient;
+    let dbTXNClient: DBClient;
     const {
       username, email, password, name,
     } = req.body;
@@ -68,14 +68,9 @@ class AuthController {
       );
 
       const newUser = userResponse.rows[0];
-      const emailVerificationToken = this.tokenHandler.generateEmailVerificationToken();
-      await this.tokenService.create(
-        newUser.user_id, 
-        emailVerificationToken, 
-        dbTXNClient
-      );
 
-      await this.sendVerificationEmail(req, newUser, emailVerificationToken);
+      await this.sendVerificationEmail(newUser, req, dbTXNClient);
+
       await this.dbClientPool.commitTransaction(dbTXNClient);
       return res.status(204).send();
     } catch (err) {
@@ -107,7 +102,25 @@ class AuthController {
       });
     }
 
+    let dbTXNClient: DBClient;
+
     try {
+      dbTXNClient = await this.dbClientPool.beginTransaction();
+    } catch (err) {
+      if (isError(err)) {
+        this.logger.log({
+          level: "error",
+          message: err.message,
+        });
+      }
+
+      return res.status(500).send({ 
+        message: errorMessages.generic
+      });
+    }
+
+    try {
+      // No need for db transaction on findUsers method here, simple query.
       const userResponse = await this.userService.findUsers(["username"], [username]);
 
       if (userResponse.rows.length === 0) {
@@ -128,8 +141,14 @@ class AuthController {
         });
       }
 
+      if (!user.verified) {
+        await this.sendVerificationEmail(user, req, dbTXNClient);
+      }
+
       const { token, cookieOptions } = await this.tokenHandler.generateUserAuthToken(user, req);
       res.cookie("scorecard_authtoken", token, cookieOptions);
+      await this.dbClientPool.commitTransaction(dbTXNClient);
+
       return res.json({ token });
     } catch (err) {
       if (isError(err)) {
@@ -138,6 +157,8 @@ class AuthController {
           message: err.message,
         });
       }
+
+      await this.dbClientPool.rollbackTransaction(dbTXNClient);
       
       return res.status(500).send({ 
         message: errorMessages.generic 
@@ -317,8 +338,30 @@ class AuthController {
     }
   }
 
-  sendVerificationEmail(req: Request, user: any, token: string) {
-    const link = `http://${req.headers.host}/api/auth/verify/${token}`;
+  async createVerificationToken(userId: number, dbClient: DBClient) {
+    const emailVerificationToken = this.tokenHandler.generateEmailVerificationToken();
+    await this.tokenService.create(
+      userId, 
+      emailVerificationToken, 
+      dbClient
+    );
+
+    return emailVerificationToken;
+  }
+
+  async deleteVerificationTokens(user: any, dbClient: DBClient){
+    const {rows: tokens} = await this.tokenService.findTokens(["user_id"], [user.user_id], dbClient);
+
+    for (let t = 0; t < tokens.length; t++) {
+      await this.tokenService.deleteToken(t, dbClient);
+    }
+  }
+
+  async sendVerificationEmail(user: any, req: Request, dbClient: DBClient){
+    await this.deleteVerificationTokens(user, dbClient);
+
+    const emailVerificationToken = await this.createVerificationToken(user.user_id, dbClient);
+    const link = `http://${req.headers.host}/api/auth/verify/${emailVerificationToken}`;
     const emailOptions = {
       subject: "Account Verification Request",
       to: user.email,
@@ -349,7 +392,7 @@ class AuthController {
       user.user_id
     );
 
-    await this.smtpService.sendEmail(emailOptions);
+    this.smtpService.sendEmail(emailOptions);
   }
 }
 
