@@ -69,7 +69,7 @@ class AuthController {
 
       const newUser = userResponse.rows[0];
 
-      this.sendVerificationEmail(newUser, req, dbTXNClient);
+      await this.sendVerificationEmail(newUser, req, dbTXNClient);
 
       await this.dbClientPool.commitTransaction(dbTXNClient);
       return res.status(204).send();
