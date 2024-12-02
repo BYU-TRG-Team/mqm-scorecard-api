@@ -20,7 +20,7 @@ import Bottle from "bottlejs";
 import { Pool } from "pg";
 import DBClientPool from "./db-client-pool";
 import { constructCleanEnv } from "./clean-env";
-import { AppEnv, EmailProvider } from "./enums";
+import { EmailProvider } from "./enums";
 
 export const constructBottle = () => {
   const bottle = new Bottle();
@@ -58,7 +58,7 @@ export const constructBottle = () => {
   bottle.factory("DBClientPool", (container) => {
     const pool = new Pool({
       connectionString: container.CleanEnv.DATABASE_URL,
-      ssl: container.CleanEnv.APP_ENV === AppEnv.Production ? { rejectUnauthorized: false } : false
+      ssl: { rejectUnauthorized: false }
     });
 
     return new DBClientPool(pool);
