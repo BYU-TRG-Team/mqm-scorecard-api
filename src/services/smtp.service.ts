@@ -6,7 +6,9 @@ class SMTPService {
   ) {}
 
   sendEmail(mailOptions: Mail.Options) {
-    return this.transporter.sendMail(mailOptions, () => {});
+    return this.transporter.sendMail(mailOptions, (err) => {
+      process.stderr.write(`${err}\n`);
+    });
   } 
 }
 
