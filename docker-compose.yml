@@ -44,7 +44,7 @@ services:
     restart: always
 
   migrate:
-    command: npm run migrate up
+    command: bash -c 'npm run migrate up && npm run db:set-user-role Chad 3'
     build:
       context: .
       target: builder
