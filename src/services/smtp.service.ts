@@ -6,7 +6,10 @@ class SMTPService {
   ) {}
 
   sendEmail(mailOptions: Mail.Options) {
-    return this.transporter.sendMail(mailOptions, () => {});
+    console.log("sendEmail initiated");
+    return this.transporter.sendMail(mailOptions, (err) => {
+      console.error(err);
+    });
   } 
 }
 
