@@ -1,5 +1,6 @@
 import Bottle from "bottlejs";
 import { Express } from "express";
+import { verifyToken, checkVerification, checkRole } from "../middleware/auth.middleware";
 
 export default (app: Express, bottle: Bottle) => {
   app.post("/api/auth/signup", bottle.container.AuthController.signup.bind(bottle.container.AuthController));
@@ -8,7 +9,11 @@ export default (app: Express, bottle: Bottle) => {
 
   app.get("/api/auth/logout", bottle.container.AuthController.logout.bind(bottle.container.AuthController));
 
-  app.get("/api/auth/verify/:token", bottle.container.AuthController.verify.bind(bottle.container.AuthController));
+  app.post("/api/auth/verify", 
+    verifyToken(bottle.container.CleanEnv),
+    checkVerification,
+    checkRole(["superadmin"]),
+    bottle.container.AuthController.verify.bind(bottle.container.AuthController));
 
   app.post("/api/auth/recovery", bottle.container.AuthController.recovery.bind(bottle.container.AuthController));
 
