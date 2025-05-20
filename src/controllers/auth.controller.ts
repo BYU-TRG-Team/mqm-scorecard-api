@@ -57,20 +57,6 @@ class AuthController {
     }
 
     try {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const userResponse = await this.userService.create(
-        username, 
-        email, 
-        hashedPassword, 
-        1, 
-        name, 
-        dbTXNClient
-      );
-
-      const newUser = userResponse.rows[0];
-
-      await this.sendVerificationEmail(newUser, req, dbTXNClient);
-
       await this.dbClientPool.commitTransaction(dbTXNClient);
       return res.status(204).send();
     } catch (err) {
@@ -141,10 +127,6 @@ class AuthController {
         });
       }
 
-      if (!user.verified) {
-        await this.sendVerificationEmail(user, req, dbTXNClient);
-      }
-
       const { token, cookieOptions } = await this.tokenHandler.generateUserAuthToken(user, req);
       res.cookie("scorecard_authtoken", token, cookieOptions);
       await this.dbClientPool.commitTransaction(dbTXNClient);
@@ -174,32 +156,42 @@ class AuthController {
   }
 
   /*
-  * GET api/auth/verify/:token
+  * POST api/auth/verify
+  * Requires superadmin privileges
+  * @userId - ID of the user to verify
   */
   async verify(req: Request, res: Response) {
-    try {
-      // Find a matching token
-      const verifyTokenResponse = await this.tokenService.findTokens(["token"], [req.params.token]);
+    const { userId } = req.body;
 
-      if (verifyTokenResponse.rows.length === 0) {
-        return res.redirect("/login");
+    if (userId === undefined) {
+      return res.status(400).send({ 
+        message: "Body must include userId" 
+      });
+    }
+
+    try {
+      // Check if the requesting user is a superadmin (role "3")
+      if (!req.role || req.role !== "superadmin") {
+        return res.status(403).send({ 
+          message: "Unauthorized. Only superadmins can verify users." 
+        });
       }
 
-      const verifyToken = verifyTokenResponse.rows[0];
-
-      // Find associated user
-      const userResponse = await this.userService.findUsers(["user_id"], [verifyToken.user_id]);
+      // Find the user to verify
+      const userResponse = await this.userService.findUsers(["user_id"], [userId]);
 
       if (userResponse.rows.length === 0) {
-        return res.status(500).send({ message: errorMessages.generic });
+        return res.status(404).send({ 
+          message: "User not found" 
+        });
       }
 
-      const user = userResponse.rows[0];
-
       // Set user as verified
-      await this.userService.setAttributes(["verified"], [true], String(user.user_id));
-      await this.tokenService.deleteToken(verifyToken.token);
-      return res.redirect("/login");
+      await this.userService.setAttributes(["verified"], [true], String(userId));
+      
+      return res.status(200).send({ 
+        message: "User successfully verified" 
+      });
     } catch (err) {
       if (isError(err)) {
         this.logger.log({
@@ -208,7 +200,7 @@ class AuthController {
         });
       }
 
-      res.status(500).send({
+      return res.status(500).send({
         message: errorMessages.generic 
       });
     }
@@ -336,44 +328,6 @@ class AuthController {
         message: errorMessages.generic 
       });
     }
-  }
-
-  async createVerificationToken(userId: number, dbClient: DBClient) {
-    const emailVerificationToken = this.tokenHandler.generateEmailVerificationToken();
-    await this.tokenService.create(
-      userId, 
-      emailVerificationToken, 
-      dbClient
-    );
-
-    return emailVerificationToken;
-  }
-
-  async deleteVerificationTokens(user: any, dbClient: DBClient){
-    const tokenResponse = await this.tokenService.findTokens(["user_id"], [user.user_id], dbClient);
-
-    for (let t = 0; t < tokenResponse.rows.length; t++) {
-      const row = tokenResponse.rows[t];
-
-      await this.tokenService.deleteToken(row.token, dbClient);
-    }
-  }
-
-  async sendVerificationEmail(user: any, req: Request, dbClient: DBClient){
-    await this.deleteVerificationTokens(user, dbClient);
-
-    const emailVerificationToken = await this.createVerificationToken(user.user_id, dbClient);
-    const link = `http://${req.headers.host}/api/auth/verify/${emailVerificationToken}`;
-    const emailOptions = {
-      subject: "Account Verification Request",
-      to: user.email,
-      from: this.cleanEnv.EMAIL_ADDRESS,
-      html: `<p>Hi ${user.username},<p>
-      <p>Please <a href="${link}">visit this link</a> to verify your account.</p> 
-      <p>If you did not request this, please ignore this email.</p>`,
-    };
-
-    return this.smtpService.sendEmail(emailOptions);
   }
 
   async sendPasswordResetEmail(req: Request, user: any) {

@@ -1,6 +1,5 @@
 import { getMockReq, getMockRes } from "@jest-mock/express";
 import { constructBottle } from "../../../bottle";
-import TokenService from "../../../services/token.service";
 import UserService from "../../../services/user.service";
 import { setTestEnvironmentVars } from "../helpers";
 
@@ -13,102 +12,102 @@ describe("tests verify method", () => {
     setTestEnvironmentVars();
   });
 
-  it("should redirect to /login for invalid verify token", async () => {
+  it("should return 400 error when userId is missing", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
-      params: {
-        token: "test",
-      },
-    });
-
-    jest.spyOn(TokenService.prototype, "findTokens").mockResolvedValueOnce({ 
-      rows: [], 
-      command: "", 
-      rowCount: 0, 
-      oid: 0, 
-      fields: [] 
+      body: {},
+      role: "superadmin" // User is a superadmin but didn't provide userId
     });
 
     await bottle.container.AuthController.verify(req, res);
 
-    expect(TokenService.prototype.findTokens).toBeCalledTimes(1);
-    expect(TokenService.prototype.findTokens).toHaveBeenCalledWith(
-      ["token"],
-      ["test"]
-    );
-
-    expect(res.redirect).toHaveBeenCalledTimes(1);
-    expect(res.redirect).toHaveBeenCalledWith("/login");
-  });
-
-  it("should throw a 500 error token with no associated user", async () => {
-    const bottle = constructBottle();
-    const { res } = getMockRes();
-    const req = getMockReq({
-      params: {
-        token: "test",
-      },
-    });
-
-    jest.spyOn(UserService.prototype, "findUsers").mockResolvedValueOnce({ 
-      rows: [], 
-      command: "", 
-      rowCount: 0, 
-      oid: 0, 
-      fields: [] 
-    });
-    jest.spyOn(TokenService.prototype, "findTokens").mockResolvedValueOnce({ 
-      rows: [{ user_id: 1 }], 
-      command: "", 
-      rowCount: 1, 
-      oid: 0, 
-      fields: [] 
-    });
-
-    await bottle.container.AuthController.verify(req, res);
-
-    expect(TokenService.prototype.findTokens).toBeCalledTimes(1);
-    expect(TokenService.prototype.findTokens).toHaveBeenCalledWith(
-      ["token"],
-      ["test"]
-    );
-
-    expect(UserService.prototype.findUsers).toBeCalledTimes(1);
-    expect(UserService.prototype.findUsers).toHaveBeenCalledWith(
-      ["user_id"],
-      [1]
-    );
-
-    expect(res.status).toHaveBeenCalledTimes(1);
-    expect(res.status).toHaveBeenCalledWith(500);
-
-    expect(res.send).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({ 
-      message: "Something went wrong on our end. Please try again." 
+      message: "Body must include userId" 
     });
   });
 
-  it("should set user as verified, remove token, and redirect to /login", async () => {
+  it("should return 403 error when user is not a superadmin", async () => {
     const bottle = constructBottle();
     const { res } = getMockRes();
     const req = getMockReq({
-      params: {
-        token: "test",
-      },
+      body: { userId: 1 },
+      role: "user" // Regular user, not superadmin
     });
-    
-    jest.spyOn(UserService.prototype, "setAttributes");
-    jest.spyOn(TokenService.prototype, "deleteToken");
+
+    await bottle.container.AuthController.verify(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.send).toHaveBeenCalledWith({ 
+      message: "Unauthorized. Only superadmins can verify users." 
+    });
+  });
+
+  it("should return 403 error when role is missing", async () => {
+    const bottle = constructBottle();
+    const { res } = getMockRes();
+    const req = getMockReq({
+      body: { userId: 1 }
+      // No role provided
+    });
+
+    await bottle.container.AuthController.verify(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.send).toHaveBeenCalledWith({ 
+      message: "Unauthorized. Only superadmins can verify users." 
+    });
+  });
+
+  it("should return 404 error when user to verify is not found", async () => {
+    const bottle = constructBottle();
+    const { res } = getMockRes();
+    const req = getMockReq({
+      body: { userId: 999 }, // Non-existent user ID
+      role: "superadmin"
+    });
+
     jest.spyOn(UserService.prototype, "findUsers").mockResolvedValueOnce({ 
-      rows: [{ user_id: 1 }], 
+      rows: [], 
       command: "", 
-      rowCount: 1, 
+      rowCount: 0, 
       oid: 0, 
       fields: [] 
     });
-    jest.spyOn(TokenService.prototype, "findTokens").mockResolvedValueOnce({ 
-      rows: [{ user_id: 1, token: "test" }], 
+
+    await bottle.container.AuthController.verify(req, res);
+
+    expect(UserService.prototype.findUsers).toBeCalledTimes(1);
+    expect(UserService.prototype.findUsers).toHaveBeenCalledWith(
+      ["user_id"],
+      [999]
+    );
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.send).toHaveBeenCalledWith({ 
+      message: "User not found" 
+    });
+  });
+
+  it("should successfully verify a user", async () => {
+    const bottle = constructBottle();
+    const { res } = getMockRes();
+    const req = getMockReq({
+      body: { userId: 1 },
+      role: "superadmin"
+    });
+    
+    jest.spyOn(UserService.prototype, "setAttributes").mockResolvedValueOnce({
+      rows: [{ user_id: 1, verified: true }],
+      command: "",
+      rowCount: 1,
+      oid: 0,
+      fields: []
+    });
+    
+    jest.spyOn(UserService.prototype, "findUsers").mockResolvedValueOnce({ 
+      rows: [{ user_id: 1, verified: false }], 
       command: "", 
       rowCount: 1, 
       oid: 0, 
@@ -117,20 +116,11 @@ describe("tests verify method", () => {
     
     await bottle.container.AuthController.verify(req, res);
 
-    expect(TokenService.prototype.findTokens).toBeCalledTimes(1);
-    expect(TokenService.prototype.findTokens).toHaveBeenCalledWith(
-      ["token"],
-      ["test"]
-    );
-
     expect(UserService.prototype.findUsers).toBeCalledTimes(1);
     expect(UserService.prototype.findUsers).toHaveBeenCalledWith(
       ["user_id"],
       [1]
     );
-
-    expect(res.redirect).toHaveBeenCalledTimes(1);
-    expect(res.redirect).toHaveBeenCalledWith("/login");
 
     expect(UserService.prototype.setAttributes).toBeCalledTimes(1);
     const setAttributesMockCall = (UserService.prototype.setAttributes as jest.Mock).mock.calls[0];
@@ -138,7 +128,29 @@ describe("tests verify method", () => {
     expect(setAttributesMockCall[1][0]).toBe(true);
     expect(setAttributesMockCall[2]).toBe("1");
 
-    expect(TokenService.prototype.deleteToken).toBeCalledTimes(1);
-    expect(TokenService.prototype.deleteToken).toHaveBeenCalledWith("test");
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({ 
+      message: "User successfully verified" 
+    });
+  });
+
+  it("should return 500 error when an exception occurs", async () => {
+    const bottle = constructBottle();
+    const { res } = getMockRes();
+    const req = getMockReq({
+      body: { userId: 1 },
+      role: "superadmin"
+    });
+
+    jest.spyOn(UserService.prototype, "findUsers").mockImplementationOnce(() => {
+      throw new Error("Database error");
+    });
+
+    await bottle.container.AuthController.verify(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ 
+      message: "Something went wrong on our end. Please try again." 
+    });
   });
 });
