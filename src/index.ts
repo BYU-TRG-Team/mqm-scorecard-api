@@ -1,14 +1,10 @@
 import { constructApp } from "./app";
+import cors from "cors";
 
-let port: any;
 const app = constructApp();
 
-if (process.env.APP_ENV === "development") {
-  port = 8081;
-} else {
-  port = process.env.PORT || 3000;
-}
+app.use(cors());
 
-app.listen(port, () => {
-  console.log(`App listening on port ${port}`);
+app.listen(8081, () => {
+  console.log(`App listening on port 8081`);
 });

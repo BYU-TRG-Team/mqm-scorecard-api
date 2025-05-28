@@ -1,21 +1,21 @@
 {
   "compilerOptions": {
-    "target": "ES6", 
-    "module": "CommonJS", 
+    "target": "ES6",
+    "module": "CommonJS",
     "resolveJsonModule": true,
-    "sourceMap": true, 
-    "outDir": "./dist", 
+    "sourceMap": true,
+    "outDir": "./dist",
     "strict": true,
     "noUnusedLocals": false,
     "moduleResolution": "node",
     "baseUrl": ".",
     "rootDir": "src/",
     "esModuleInterop": true,
-    "declaration": true,  
+    "declaration": true
   },
   "include": [
     "src/**/*",
-    "@types/**/*",
+    "@types/**/*"
   ],
   "exclude": [
     "**/__tests__/**/*"

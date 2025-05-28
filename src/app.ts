@@ -2,6 +2,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import fileUpload from "express-fileupload";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import constructAuthRoutes from "./routes/auth.routes";
 import constructUserRoutes from "./routes/user.routes";
 import constructProjectRoutes from "./routes/project.routes";
@@ -13,6 +14,7 @@ export const constructApp = () => {
   const app = express();
   const bottle = constructBottle();
 
+  app.use(cors());
   app.use(bodyParser());
   app.use(cookieParser());
   app.use(express.urlencoded({
@@ -21,6 +23,10 @@ export const constructApp = () => {
   app.use(fileUpload({
     createParentPath: true,
   }));
+
+  app.get('/health', (_, res) => {
+    res.status(200).json({ status: 'OK' });
+  });
 
   constructAuthRoutes(app, bottle);
   constructUserRoutes(app, bottle);

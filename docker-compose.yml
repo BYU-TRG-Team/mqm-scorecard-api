@@ -1,0 +1,81 @@
+services:
+  postgres:
+    image: postgres:16.4
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=mqmscorecard
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    restart: always
+
+  node:
+    build:
+      context: .
+      target: api
+    depends_on:
+      postgres:
+        condition: service_healthy
+        restart: true
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+      # This one is not listed in the README but I cannot get the
+      # back end to connect without it.
+      - PGPASSWORD=postgres
+      - APP_ENV
+      - AUTH_SECRET
+      - DATABASE_URL
+      - EMAIL_ADDRESS
+      - EMAIL_PASSWORD
+      - EMAIL_PROVIDER
+      - EMAIL_PROVIDER_API_KEY
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    restart: always
+
+  migrate:
+    command: bash -c 'npm run migrate up && npm run db:set-user-role Chad 3'
+    build:
+      context: .
+      target: builder
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+      # This one is not listed in the README but I cannot get the
+      # back end to connect without it.
+      - PGPASSWORD=postgres
+      - APP_ENV
+      - AUTH_SECRET
+      - DATABASE_URL
+      - EMAIL_ADDRESS
+      - EMAIL_PASSWORD
+      - EMAIL_PROVIDER
+      - EMAIL_PROVIDER_API_KEY
+
+  nginx:
+    build:
+      context: "https://github.com/verdude/mqm-scorecard.git"
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      node:
+        condition: service_healthy
+        restart: false
+    restart: always
+
+volumes:
+  postgres-data:
