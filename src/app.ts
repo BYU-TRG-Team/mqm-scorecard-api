@@ -9,10 +9,16 @@ import constructProjectRoutes from "./routes/project.routes";
 import constructSegmentRoutes from "./routes/segment.routes";
 import constructIssueRoutes from "./routes/issue.routes";
 import { constructBottle } from "./bottle";
+import { runSeedOperations } from "./db/seed";
 
 export const constructApp = () => {
   const app = express();
   const bottle = constructBottle();
+
+  // Run database seeding during app initialization
+  runSeedOperations().catch(err => {
+    console.error("Failed to seed database:", err);
+  });
 
   app.use(cors());
   app.use(bodyParser());
@@ -24,8 +30,8 @@ export const constructApp = () => {
     createParentPath: true,
   }));
 
-  app.get('/health', (_, res) => {
-    res.status(200).json({ status: 'OK' });
+  app.get("/health", (_, res) => {
+    res.status(200).json({ status: "OK" });
   });
 
   constructAuthRoutes(app, bottle);
