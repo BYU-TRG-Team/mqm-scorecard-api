@@ -67,7 +67,7 @@ services:
 
   nginx:
     build:
-      context: "https://github.com/verdude/mqm-scorecard.git"
+      context: "https://github.com/BYU-TRG-Team/mqm-scorecard.git"
     ports:
       - "80:80"
       - "443:443"
