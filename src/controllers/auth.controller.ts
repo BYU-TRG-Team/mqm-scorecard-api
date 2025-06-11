@@ -52,11 +52,21 @@ class AuthController {
       }
 
       return res.status(500).send({ 
-        message: errorMessages.generic
+        message: "Failed to start transaction"
       });
     }
 
     try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const userResponse = await this.userService.create(
+        username, 
+        email, 
+        hashedPassword, 
+        1, 
+        name, 
+        dbTXNClient
+      );
+
       await this.dbClientPool.commitTransaction(dbTXNClient);
       return res.status(204).send();
     } catch (err) {
